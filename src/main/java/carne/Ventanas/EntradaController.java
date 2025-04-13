@@ -21,7 +21,7 @@ public class EntradaController implements Initializable {
     private double velocidadY = 0;
     private final double GRAVEDAD = 0.5;
     private final double FUERZA_SALTO = -15;
-    private final double Y_SUELO = 527.0; // Ajustar según la caída
+    private final double Y_SUELO = 527.0;
 
     // Cargar imágenes de los fotogramas
     private Image imgCaminarIzquierda1 = new Image(getClass().getResource("/Imagenes/Personaje/Izquierda1.png").toExternalForm());
@@ -31,10 +31,15 @@ public class EntradaController implements Initializable {
     private Image imgIdleIzquierda = new Image(getClass().getResource("/Imagenes/Personaje/IdleIzq.png").toExternalForm());
     private Image imgIdleDerecha = new Image(getClass().getResource("/Imagenes/Personaje/IdleDer.png").toExternalForm());
 
+    // Variables de temporizador
+    private long ultimoCambioFrame = 0;
+    private boolean frameAlterno = false;
+    private final long INTERVALO_CAMBIO_FRAME = 200_000_000; // 200ms en nanosegundos
+
     @FXML
     private AnchorPane rootPane;
     @FXML
-    private ImageView ImagenPJ; // Referencia al ImageView
+    private ImageView ImagenPJ;
 
     // Variables para animación de caminata
     private boolean caminandoIzquierda = false;
@@ -42,7 +47,7 @@ public class EntradaController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        rootPane.setFocusTraversable(true); // Para que reciba eventos de teclado
+        rootPane.setFocusTraversable(true);
         rootPane.requestFocus();
 
         // Eventos de teclado
@@ -67,12 +72,12 @@ public class EntradaController implements Initializable {
             if (event.getCode() == KeyCode.LEFT) {
                 izquierdaPresionada = false;
                 caminandoIzquierda = false;
-                ImagenPJ.setImage(imgIdleIzquierda); // <- aquí el cambio
+                ImagenPJ.setImage(imgIdleIzquierda);
             }
             if (event.getCode() == KeyCode.RIGHT) {
                 derechaPresionada = false;
                 caminandoDerecha = false;
-                ImagenPJ.setImage(imgIdleDerecha); // <- aquí el cambio
+                ImagenPJ.setImage(imgIdleDerecha);
             }
         });
 
@@ -82,13 +87,19 @@ public class EntradaController implements Initializable {
             public void handle(long now) {
                 double velocidadX = 5;
 
+                // Temporizador para animación
+                if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
+                    frameAlterno = !frameAlterno;
+                    ultimoCambioFrame = now;
+                }
+
                 // Movimiento lateral y cambio de imagen
                 if (izquierdaPresionada) {
                     ImagenPJ.setLayoutX(ImagenPJ.getLayoutX() - velocidadX);
-                    cambiarImagenCaminarIzquierda();
+                    cambiarImagenCaminarIzquierda(frameAlterno);
                 } else if (derechaPresionada) {
                     ImagenPJ.setLayoutX(ImagenPJ.getLayoutX() + velocidadX);
-                    cambiarImagenCaminarDerecha();
+                    cambiarImagenCaminarDerecha(frameAlterno);
                 } else {
                     // Si no está moviendo, poner en estado idle
                     if (caminandoIzquierda) {
@@ -107,7 +118,6 @@ public class EntradaController implements Initializable {
                         ImagenPJ.setLayoutY(Y_SUELO);
                         saltando = false;
                         velocidadY = 0;
-                        // Si está caminando, volver a la imagen de idle en la posición correspondiente
                         if (caminandoIzquierda) {
                             ImagenPJ.setImage(imgIdleIzquierda);
                         } else if (caminandoDerecha) {
@@ -120,21 +130,13 @@ public class EntradaController implements Initializable {
         gameLoop.start();
     }
 
-    // Cambiar a las imágenes de caminar hacia la izquierda
-    private void cambiarImagenCaminarIzquierda() {
-        if (ImagenPJ.getLayoutX() % 2 == 0) {
-            ImagenPJ.setImage(imgCaminarIzquierda1);
-        } else {
-            ImagenPJ.setImage(imgCaminarIzquierda2);
-        }
+    // Cambiar a las imágenes de caminar hacia la izquierda con animación temporizada
+    private void cambiarImagenCaminarIzquierda(boolean alterno) {
+        ImagenPJ.setImage(alterno ? imgCaminarIzquierda1 : imgCaminarIzquierda2);
     }
 
-    // Cambiar a las imágenes de caminar hacia la derecha
-    private void cambiarImagenCaminarDerecha() {
-        if (ImagenPJ.getLayoutX() % 2 == 0) {
-            ImagenPJ.setImage(imgCaminarDerecha1);
-        } else {
-            ImagenPJ.setImage(imgCaminarDerecha2);
-        }
+    // Cambiar a las imágenes de caminar hacia la derecha con animación temporizada
+    private void cambiarImagenCaminarDerecha(boolean alterno) {
+        ImagenPJ.setImage(alterno ? imgCaminarDerecha1 : imgCaminarDerecha2);
     }
 }
