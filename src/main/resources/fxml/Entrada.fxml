@@ -3,6 +3,7 @@
 <?import java.net.URL?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.Pane?>
 
 <AnchorPane id="AnchorPane" prefHeight="1080" prefWidth="1920" styleClass="mainFxmlClass" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="carne.Ventanas.EntradaController">
     <stylesheets>
@@ -12,6 +13,9 @@
       <AnchorPane fx:id="rootPane" prefHeight="1080.0" prefWidth="1920.0">
          <children>
             <ImageView fx:id="ImagenPJ" fitHeight="129.0" fitWidth="82.0" layoutX="59.0" layoutY="527.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje" />
+            <Pane fx:id="Plataforma" layoutX="556.0" layoutY="544.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
+            <Pane fx:id="Plataforma1" layoutX="914.0" layoutY="491.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
+            <Pane fx:id="Plataforma2" layoutX="661.0" layoutY="364.0" prefHeight="30.0" prefWidth="114.0" styleClass="Plataforma" />
          </children>
       </AnchorPane>
    </children>
