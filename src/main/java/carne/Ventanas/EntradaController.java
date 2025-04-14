@@ -1,12 +1,16 @@
 package carne.Ventanas;
 
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import javafx.animation.AnimationTimer;
 import javafx.animation.FadeTransition;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Bounds;
+import javafx.scene.Node;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -31,6 +35,9 @@ public class EntradaController implements Initializable {
     private Image imgCaminarDerecha1, imgCaminarDerecha2;
     private Image imgIdleIzquierda, imgIdleDerecha;
 
+    private boolean enPlataforma1 = false;
+    private boolean enPlataforma2 = false;
+    private boolean enPlataforma3 = false;
     private long ultimoCambioFrame = 0;
     private boolean frameAlterno = false;
     private final long INTERVALO_CAMBIO_FRAME = 200_000_000;
@@ -48,6 +55,7 @@ public class EntradaController implements Initializable {
 
     private boolean caminandoIzquierda = false;
     private boolean caminandoDerecha = false;
+    private double velocidadX;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
@@ -118,14 +126,16 @@ public class EntradaController implements Initializable {
             public void handle(long now) {
                 actualizarMovimientoLateral(now);
                 actualizarSaltoYGravedad(now);
-                detectarColisionConPlataforma();
+                detectarColisionConElementosPorNombre("Plataforma");
+                detectarColisionConElementosPorNombre("Plataforma1");
+                detectarColisionConElementosPorNombre("Plataforma2");
             }
         };
         gameLoop.start();
     }
 
     private void actualizarMovimientoLateral(long now) {
-        double velocidadX = 5;
+        velocidadX = 3.9;
         double nuevaX = ImagenPJ.getLayoutX();
 
         if (izquierdaPresionada) {
@@ -207,62 +217,117 @@ public class EntradaController implements Initializable {
         }
     }
 
-    private void detectarColisionConPlataforma() {
+    public void detectarColisionConElementosPorNombre(String nombre) {
         Bounds pjBounds = ImagenPJ.getBoundsInParent();
-        Bounds plataformaBounds = Plataforma.getBoundsInParent();
+        boolean intersecta = false;
 
-        boolean intersecta = pjBounds.intersects(plataformaBounds);
-
-        // Colisión desde arriba (plataformeo)
-        boolean caeDesdeArriba = velocidadY > 0
-                && pjBounds.getMaxY() <= plataformaBounds.getMinY() + 10
-                && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
-                && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10;
-
-        if (intersecta && caeDesdeArriba) {
-            ImagenPJ.setLayoutY(plataformaBounds.getMinY() - pjBounds.getHeight());
-            velocidadY = 0;
-            saltando = false;
+        // Detectar la plataforma
+        Pane plataforma = null;
+        switch (nombre) {
+            case "Plataforma":
+                plataforma = Plataforma;
+                break;
+            case "Plataforma1":
+                plataforma = Plataforma1;
+                break;
+            case "Plataforma2":
+                plataforma = Plataforma2;
+                break;
         }
 
-        // Colisión lateral por la izquierda del personaje (bloquea la derecha de la plataforma)
-        if (intersecta
-                && pjBounds.getMinX() < plataformaBounds.getMaxX()
-                && pjBounds.getMaxX() > plataformaBounds.getMaxX() - 10
-                && pjBounds.getMaxY() > plataformaBounds.getMinY() + 10) {
+        if (plataforma != null) {
+            Bounds plataformaBounds = plataforma.getBoundsInParent();
+            intersecta = pjBounds.intersects(plataformaBounds);
 
-            ImagenPJ.setLayoutX(plataformaBounds.getMaxX());
+            // Colisión desde arriba (plataformeo)
+            boolean caeDesdeArriba = velocidadY > 0
+                    && pjBounds.getMaxY() <= plataformaBounds.getMinY() + 10
+                    && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
+                    && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10;
+
+            if (intersecta && caeDesdeArriba) {
+                ImagenPJ.setLayoutY(plataformaBounds.getMinY() - pjBounds.getHeight());
+                velocidadY = 0;
+                saltando = false;
+
+                // Activar booleans
+                switch (nombre) {
+                    case "Plataforma":
+                        enPlataforma1 = true;
+                        break;
+                    case "Plataforma1":
+                        enPlataforma2 = true;
+                        break;
+                    case "Plataforma2":
+                        enPlataforma3 = true;
+                        break;
+                }
+            }
+
+            // 🔽 Colisión desde abajo
+            boolean chocaDesdeAbajo = velocidadY < 0
+                    && pjBounds.getMinY() >= plataformaBounds.getMaxY() - 10
+                    && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
+                    && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10;
+
+            if (intersecta && chocaDesdeAbajo) {
+                ImagenPJ.setLayoutY(plataformaBounds.getMaxY());
+                velocidadY = 0; // o -velocidadY para rebote
+            }
+
+            // ⬅️ Colisión lateral izquierda
+            boolean chocaPorLaIzquierda = velocidadX > 0
+                    && pjBounds.getMaxX() >= plataformaBounds.getMinX()
+                    && pjBounds.getMinX() < plataformaBounds.getMinX()
+                    && pjBounds.getMaxY() > plataformaBounds.getMinY() + 10;
+
+            if (intersecta && chocaPorLaIzquierda) {
+                ImagenPJ.setLayoutX(plataformaBounds.getMinX() - pjBounds.getWidth());
+                velocidadX = 0;
+            }
+
+            // ➡️ Colisión lateral derecha (entra desde la izquierda)
+            boolean chocaPorLaDerecha = velocidadX < 0
+                    && pjBounds.getMinX() < plataformaBounds.getMaxX()
+                    && pjBounds.getMaxX() > plataformaBounds.getMaxX() - 5
+                    && pjBounds.getMaxY() > plataformaBounds.getMinY() + 5
+                    && pjBounds.getMinY() < plataformaBounds.getMaxY() - 5;
+
+            if (intersecta && chocaPorLaDerecha) {
+                ImagenPJ.setLayoutX(plataformaBounds.getMaxX());
+                velocidadX = 0;
+            }
         }
 
-        // Colisión lateral por la derecha del personaje (bloquea la izquierda de la plataforma)
-        if (intersecta
-                && pjBounds.getMaxX() > plataformaBounds.getMinX()
-                && pjBounds.getMinX() < plataformaBounds.getMinX() + 10
-                && pjBounds.getMaxY() > plataformaBounds.getMinY() + 10) {
-
-            ImagenPJ.setLayoutX(plataformaBounds.getMinX() - pjBounds.getWidth());
+        // Validación de booleans
+        if ((nombre.equals("Plataforma") && !enPlataforma1)
+                || (nombre.equals("Plataforma1") && !enPlataforma2)
+                || (nombre.equals("Plataforma2") && !enPlataforma3)) {
+            return;
         }
 
-        // Colisión desde abajo (evita saltar a través de la plataforma)
-        if (intersecta
-                && pjBounds.getMinY() < plataformaBounds.getMaxY()
-                && pjBounds.getMaxY() > plataformaBounds.getMaxY() - 10
-                && velocidadY < 0) {
+        // Ya no está sobre la plataforma
+        if (!(pjBounds.getMaxY() <= plataforma.getBoundsInParent().getMinY() + 5
+                && pjBounds.getMaxY() >= plataforma.getBoundsInParent().getMinY() - 10
+                && pjBounds.getMaxX() > plataforma.getBoundsInParent().getMinX() + 10
+                && pjBounds.getMinX() < plataforma.getBoundsInParent().getMaxX() - 10)) {
 
-            // Rebota un poco o simplemente detiene la subida
-            velocidadY = 0;
-        }
+            switch (nombre) {
+                case "Plataforma":
+                    enPlataforma1 = false;
+                    break;
+                case "Plataforma1":
+                    enPlataforma2 = false;
+                    break;
+                case "Plataforma2":
+                    enPlataforma3 = false;
+                    break;
+            }
 
-        // Si el personaje ya no está sobre la plataforma
-        if (!(pjBounds.getMaxY() <= plataformaBounds.getMinY() + 5
-                && pjBounds.getMaxY() >= plataformaBounds.getMinY() - 10
-                && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
-                && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10)) {
-
-            // Si no está tocando suelo
             if (ImagenPJ.getLayoutY() < Y_SUELO && !saltando) {
                 saltando = true;
             }
         }
     }
+
 }
