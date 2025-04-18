@@ -13,9 +13,10 @@
       <AnchorPane fx:id="rootPane" prefHeight="1080.0" prefWidth="1920.0">
          <children>
             <ImageView fx:id="ImagenPJ" fitHeight="129.0" fitWidth="82.0" layoutX="59.0" layoutY="527.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje" />
-            <Pane fx:id="Plataforma" layoutX="556.0" layoutY="544.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
-            <Pane fx:id="Plataforma1" layoutX="914.0" layoutY="491.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
-            <Pane fx:id="Plataforma2" layoutX="661.0" layoutY="364.0" prefHeight="30.0" prefWidth="114.0" styleClass="Plataforma" />
+            <Pane fx:id="Plataforma" layoutX="499.0" layoutY="540.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
+            <Pane fx:id="Plataforma1" layoutX="862.0" layoutY="512.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
+            <Pane fx:id="Plataforma2" layoutX="1109.0" layoutY="407.0" prefHeight="30.0" prefWidth="114.0" styleClass="Plataforma" />
+            <ImageView fx:id="ImagenPJ1" fitHeight="129.0" fitWidth="82.0" layoutX="192.0" layoutY="527.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje" />
          </children>
       </AnchorPane>
    </children>

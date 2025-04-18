@@ -9,50 +9,101 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.image.ImageView;
 import carne.Clases.Personaje; // Importación de la nueva clase
+import javafx.scene.image.Image;
 
 public class EntradaController implements Initializable {
 
     private Personaje personaje;
-
+    private Personaje personaje1;
     @FXML
     private AnchorPane rootPane;
     @FXML
     private ImageView ImagenPJ;  // El ImageView que representa al personaje
+    @FXML
+    private ImageView ImagenPJ1;
+
+    //chica sprites
+    Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
+    Image DerPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
+    Image IzqPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/izq paso1.png").toExternalForm());
+    Image IzqPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/izq paso2.png").toExternalForm());
+    Image DerIdleChica = new Image(getClass().getResource("/Imagenes/Chica/der idle.png").toExternalForm());
+    Image IzqIdleChica = new Image(getClass().getResource("/Imagenes/Chica/izq idle.png").toExternalForm());
+    Image TransicionIzqChica = new Image(getClass().getResource("/Imagenes/Chica/der transicion.png").toExternalForm());
+    Image TransicionDerChica = new Image(getClass().getResource("/Imagenes/Chica/izq transicion.png").toExternalForm());
+
+    //chico sprites
+    Image DerPaso1Chico = new Image(getClass().getResource("/Imagenes/Chico/izq paso1.png").toExternalForm());
+    Image DerPaso2Chico = new Image(getClass().getResource("/Imagenes/Chico/izq paso2.png").toExternalForm());
+    Image IzqPaso1Chico = new Image(getClass().getResource("/Imagenes/Chico/der paso1.png").toExternalForm());
+    Image IzqPaso2Chico = new Image(getClass().getResource("/Imagenes/Chico/der paso2.png").toExternalForm());
+    Image DerIdleChico = new Image(getClass().getResource("/Imagenes/Chico/izq idle.png").toExternalForm());
+    Image IzqIdleChico = new Image(getClass().getResource("/Imagenes/Chico/der idle.png").toExternalForm());
+    Image TransicionIzqChico = new Image(getClass().getResource("/Imagenes/Chico/izq transicion.png").toExternalForm());
+    Image TransicionDerChico = new Image(getClass().getResource("/Imagenes/Chico/der transicion.png").toExternalForm());
 
     @Override
-public void initialize(URL url, ResourceBundle rb) {
-    personaje = new Personaje(rootPane, ImagenPJ);
-    configurarEventosTeclado();
-    iniciarBucleJuego();
-    rootPane.requestFocus();  // Solicita el foco para que el rootPane reciba eventos de teclado
-    rootPane.setFocusTraversable(true);  // Asegúrate de que el rootPane es traversable
-}
+    public void initialize(URL url, ResourceBundle rb) {
+        personaje = new Personaje(rootPane, ImagenPJ, DerPaso1Chica, DerPaso2Chica,
+                IzqPaso1Chica, IzqPaso2Chica, DerIdleChica,
+                IzqIdleChica, TransicionIzqChica, TransicionDerChica);
+
+        personaje1 = new Personaje(rootPane, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
+                IzqPaso1Chico, IzqPaso2Chico, DerIdleChico,
+                IzqIdleChico, TransicionIzqChico, TransicionDerChico);
+        configurarEventosTeclado();
+        iniciarBucleJuego();
+        rootPane.requestFocus();  // Solicita el foco para que el rootPane reciba eventos de teclado
+        rootPane.setFocusTraversable(true);  // Asegúrate de que el rootPane es traversable
+    }
 
     private void configurarEventosTeclado() {
-        rootPane.setOnKeyPressed(event -> {
-            if (event.getCode() == KeyCode.LEFT) {
-                personaje.presionarTecla(KeyCode.LEFT);
-            } else if (event.getCode() == KeyCode.RIGHT) {
-                personaje.presionarTecla(KeyCode.RIGHT);
-            } else if (event.getCode() == KeyCode.SPACE) {
-                personaje.presionarTecla(KeyCode.SPACE);
-            }
-        });
+    rootPane.setOnKeyPressed(event -> {
+        // Para el personaje principal (usando las flechas)
+        if (event.getCode() == KeyCode.LEFT) {
+            personaje.presionarTecla(KeyCode.LEFT);
+        } else if (event.getCode() == KeyCode.RIGHT) {
+            personaje.presionarTecla(KeyCode.RIGHT);
+        } else if (event.getCode() == KeyCode.UP) {  // Cambiar SPACE por UP
+            personaje.presionarTecla(KeyCode.SPACE);  // Para saltar con la flecha arriba
+        }
 
-        rootPane.setOnKeyReleased(event -> {
-            if (event.getCode() == KeyCode.LEFT) {
-                personaje.soltarTecla(KeyCode.LEFT);
-            } else if (event.getCode() == KeyCode.RIGHT) {
-                personaje.soltarTecla(KeyCode.RIGHT);
-            }
-        });
-    }
+        // Para el personaje 2 (jugador 2) usando A, D, W
+        if (event.getCode() == KeyCode.A) {
+            personaje1.presionarTecla(KeyCode.LEFT); // A para mover a la izquierda
+        } else if (event.getCode() == KeyCode.D) {
+            personaje1.presionarTecla(KeyCode.RIGHT); // D para mover a la derecha
+        } else if (event.getCode() == KeyCode.W) {
+            personaje1.presionarTecla(KeyCode.SPACE); // W para saltar
+        }
+    });
+
+    rootPane.setOnKeyReleased(event -> {
+        // Para el personaje principal
+        if (event.getCode() == KeyCode.LEFT) {
+            personaje.soltarTecla(KeyCode.LEFT);
+        } else if (event.getCode() == KeyCode.RIGHT) {
+            personaje.soltarTecla(KeyCode.RIGHT);
+        } else if (event.getCode() == KeyCode.UP) {  // Cambiar SPACE por UP
+            personaje.soltarTecla(KeyCode.SPACE);  // Para que deje de saltar cuando se suelta la flecha arriba
+        }
+
+        // Para el personaje 2
+        if (event.getCode() == KeyCode.A) {
+            personaje1.soltarTecla(KeyCode.LEFT);
+        } else if (event.getCode() == KeyCode.D) {
+            personaje1.soltarTecla(KeyCode.RIGHT);
+        }
+    });
+}
+
 
     private void iniciarBucleJuego() {
         new AnimationTimer() {
             @Override
             public void handle(long now) {
                 personaje.actualizar(now);
+                personaje1.actualizar(now);
             }
         }.start();
     }

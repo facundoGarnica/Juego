@@ -30,30 +30,43 @@ public class Personaje {
     private int estadoAnimacion = 0;
     private final long INTERVALO_CAMBIO_FRAME = 250_000_000;
 
-    // Modificado para recibir el ImageView
-    public Personaje(AnchorPane root, ImageView sprite) {
+    // Constructor con el ImageView y las imágenes como parámetros
+    public Personaje(AnchorPane root, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
+                     Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda, 
+                     Image imgIdleDerecha, Image imgtransicionIzquierda, Image imgtransicionDerecha) {
         this.root = root;
         this.sprite = sprite;  // Usamos el ImageView pasado desde EntradaController
+        this.imgCaminarIzquierda1 = imgCaminarIzquierda1;
+        this.imgCaminarIzquierda2 = imgCaminarIzquierda2;
+        this.imgCaminarDerecha1 = imgCaminarDerecha1;
+        this.imgCaminarDerecha2 = imgCaminarDerecha2;
+        this.imgIdleIzquierda = imgIdleIzquierda;
+        this.imgIdleDerecha = imgIdleDerecha;
+        this.imgtransicionIzquierda = imgtransicionIzquierda;
+        this.imgtransicionDerecha = imgtransicionDerecha;
+        
         System.out.println("Personaje creado con ImageView: " + sprite);
-        inicializarImagenes();
         configurarPersonaje();
     }
     
-    private void inicializarImagenes() {
-        imgCaminarIzquierda1 = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
-        imgCaminarIzquierda2 = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
-        imgtransicionIzquierda = new Image(getClass().getResource("/Imagenes/Chica/der transicion.png").toExternalForm());
-        imgCaminarDerecha1 = new Image(getClass().getResource("/Imagenes/Chica/izq paso1.png").toExternalForm());
-        imgCaminarDerecha2 = new Image(getClass().getResource("/Imagenes/Chica/izq paso2.png").toExternalForm());
-        imgtransicionDerecha = new Image(getClass().getResource("/Imagenes/Chica/izq transicion.png").toExternalForm());
-        imgIdleIzquierda = new Image(getClass().getResource("/Imagenes/Chica/der idle.png").toExternalForm());
-        imgIdleDerecha = new Image(getClass().getResource("/Imagenes/Chica/izq idle.png").toExternalForm());
+    // Método setter para establecer las imágenes
+    public void setSprites(Image imgCaminarIzquierda1, Image imgCaminarIzquierda2, Image imgCaminarDerecha1,
+                           Image imgCaminarDerecha2, Image imgIdleIzquierda, Image imgIdleDerecha,
+                           Image imgtransicionIzquierda, Image imgtransicionDerecha) {
+        this.imgCaminarIzquierda1 = imgCaminarIzquierda1;
+        this.imgCaminarIzquierda2 = imgCaminarIzquierda2;
+        this.imgCaminarDerecha1 = imgCaminarDerecha1;
+        this.imgCaminarDerecha2 = imgCaminarDerecha2;
+        this.imgIdleIzquierda = imgIdleIzquierda;
+        this.imgIdleDerecha = imgIdleDerecha;
+        this.imgtransicionIzquierda = imgtransicionIzquierda;
+        this.imgtransicionDerecha = imgtransicionDerecha;
     }
 
     private void configurarPersonaje() {
         sprite.setLayoutX(100);
         sprite.setLayoutY(Y_SUELO);
-        sprite.setImage(imgIdleDerecha);
+        sprite.setImage(imgIdleDerecha);  // Asumimos que empieza mirando a la derecha
         System.out.println("Posición inicial del personaje: " + sprite.getLayoutX() + ", " + sprite.getLayoutY());
     }
 
