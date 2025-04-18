@@ -34,14 +34,15 @@ public class EntradaController implements Initializable {
     private Image imgCaminarIzquierda1, imgCaminarIzquierda2;
     private Image imgCaminarDerecha1, imgCaminarDerecha2;
     private Image imgIdleIzquierda, imgIdleDerecha;
+    private Image imgtransicionIzquierda, imgtransicionDerecha;
 
     private boolean enPlataforma1 = false;
     private boolean enPlataforma2 = false;
     private boolean enPlataforma3 = false;
     private long ultimoCambioFrame = 0;
     private boolean frameAlterno = false;
-    private final long INTERVALO_CAMBIO_FRAME = 200_000_000;
-
+    private final long INTERVALO_CAMBIO_FRAME = 250_000_000;
+    private boolean mirandoADerecha = true;
     @FXML
     private AnchorPane rootPane;
     @FXML
@@ -56,7 +57,7 @@ public class EntradaController implements Initializable {
     private boolean caminandoIzquierda = false;
     private boolean caminandoDerecha = false;
     private double velocidadX;
-
+private int estadoAnimacion = 0;
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         inicializarImagenes();
@@ -66,12 +67,17 @@ public class EntradaController implements Initializable {
     }
 
     private void inicializarImagenes() {
-        imgCaminarIzquierda1 = new Image(getClass().getResource("/Imagenes/Personaje/Izquierda1.png").toExternalForm());
-        imgCaminarIzquierda2 = new Image(getClass().getResource("/Imagenes/Personaje/Izquierda2.png").toExternalForm());
-        imgCaminarDerecha1 = new Image(getClass().getResource("/Imagenes/Personaje/Derecha1.png").toExternalForm());
-        imgCaminarDerecha2 = new Image(getClass().getResource("/Imagenes/Personaje/Derecha2.png").toExternalForm());
-        imgIdleIzquierda = new Image(getClass().getResource("/Imagenes/Personaje/IdleIzq.png").toExternalForm());
-        imgIdleDerecha = new Image(getClass().getResource("/Imagenes/Personaje/IdleDer.png").toExternalForm());
+        imgCaminarIzquierda1 = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
+        imgCaminarIzquierda2 = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
+        imgtransicionIzquierda = new Image(getClass().getResource("/Imagenes/Chica/der transicion.png").toExternalForm());
+
+        imgCaminarDerecha1 = new Image(getClass().getResource("/Imagenes/Chica/izq paso1.png").toExternalForm());
+        imgCaminarDerecha2 = new Image(getClass().getResource("/Imagenes/Chica/izq paso2.png").toExternalForm());
+        imgtransicionDerecha = new Image(getClass().getResource("/Imagenes/Chica/izq transicion.png").toExternalForm());
+
+        imgIdleIzquierda = new Image(getClass().getResource("/Imagenes/Chica/der idle.png").toExternalForm());
+        imgIdleDerecha = new Image(getClass().getResource("/Imagenes/Chica/izq idle.png").toExternalForm());
+
     }
 
     private void configurarPersonaje() {
@@ -84,15 +90,44 @@ public class EntradaController implements Initializable {
         ImagenPJ.setImage(imgIdleDerecha);
     }
 
+    private void actualizarAnimacion(long now) {
+    if (saltando) {
+        if (izquierdaPresionada || caminandoIzquierda) {
+            cambiarImagenCaminarIzquierda(now); // animación en el aire hacia la izquierda
+            mirandoADerecha = false;
+        } else if (derechaPresionada || caminandoDerecha) {
+            cambiarImagenCaminarDerecha(now); // animación en el aire hacia la derecha
+            mirandoADerecha = true;
+        } else {
+            // Salta quieto: usar imagen de transición según dirección
+            ImagenPJ.setImage(mirandoADerecha ? imgtransicionDerecha : imgtransicionIzquierda);
+        }
+    } else if (izquierdaPresionada) {
+        cambiarImagenCaminarIzquierda(now);
+        mirandoADerecha = false;
+    } else if (derechaPresionada) {
+        cambiarImagenCaminarDerecha(now);
+        mirandoADerecha = true;
+    } else {
+        // Quieto sobre el suelo
+        ImagenPJ.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
+    }
+}
+
+
     private void configurarEventosTeclado() {
         rootPane.setOnKeyPressed(event -> {
             if (event.getCode() == KeyCode.LEFT) {
                 izquierdaPresionada = true;
                 caminandoIzquierda = true;
+                mirandoADerecha = false; // <- Agregado
+                cambiarImagenCaminarIzquierda(System.nanoTime());
             }
             if (event.getCode() == KeyCode.RIGHT) {
                 derechaPresionada = true;
                 caminandoDerecha = true;
+                mirandoADerecha = true; // <- Agregado
+                cambiarImagenCaminarDerecha(System.nanoTime());
             }
             if (event.getCode() == KeyCode.SPACE) {
                 if (!saltando) {
@@ -129,13 +164,14 @@ public class EntradaController implements Initializable {
                 detectarColisionConElementosPorNombre("Plataforma");
                 detectarColisionConElementosPorNombre("Plataforma1");
                 detectarColisionConElementosPorNombre("Plataforma2");
+                actualizarAnimacion(now);
             }
         };
         gameLoop.start();
     }
 
     private void actualizarMovimientoLateral(long now) {
-        velocidadX = 3.9;
+        velocidadX = 3.0;
         double nuevaX = ImagenPJ.getLayoutX();
 
         if (izquierdaPresionada) {
@@ -187,20 +223,46 @@ public class EntradaController implements Initializable {
     }
 
     private void cambiarImagenCaminarIzquierda(long now) {
-        if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
-            ImagenPJ.setImage(frameAlterno ? imgCaminarIzquierda1 : imgCaminarIzquierda2);
-            frameAlterno = !frameAlterno;
-            ultimoCambioFrame = now;
+    if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
+        switch (estadoAnimacion) {
+            case 0:
+                ImagenPJ.setImage(imgCaminarIzquierda1);
+                break;
+            case 1:
+                ImagenPJ.setImage(imgtransicionIzquierda);
+                break;
+            case 2:
+                ImagenPJ.setImage(imgCaminarIzquierda2);
+                break;
+            case 3:
+                ImagenPJ.setImage(imgtransicionIzquierda);
+                break;
         }
+        estadoAnimacion = (estadoAnimacion + 1) % 4; // Cicla de 0 a 3
+        ultimoCambioFrame = now;
     }
+}
 
-    private void cambiarImagenCaminarDerecha(long now) {
-        if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
-            ImagenPJ.setImage(frameAlterno ? imgCaminarDerecha1 : imgCaminarDerecha2);
-            frameAlterno = !frameAlterno;
-            ultimoCambioFrame = now;
+private void cambiarImagenCaminarDerecha(long now) {
+    if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
+        switch (estadoAnimacion) {
+            case 0:
+                ImagenPJ.setImage(imgCaminarDerecha1);
+                break;
+            case 1:
+                ImagenPJ.setImage(imgtransicionDerecha);
+                break;
+            case 2:
+                ImagenPJ.setImage(imgCaminarDerecha2);
+                break;
+            case 3:
+                ImagenPJ.setImage(imgtransicionDerecha);
+                break;
         }
+        estadoAnimacion = (estadoAnimacion + 1) % 4;
+        ultimoCambioFrame = now;
     }
+}
 
     private void crearParticulasAterrizaje() {
         for (int i = 0; i < 5; i++) {
