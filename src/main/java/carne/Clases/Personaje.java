@@ -131,28 +131,50 @@ public class Personaje {
         }
     }
 
-    private void aplicarGravedad(long now) {
-        if (saltando) {
-            velocidadY += GRAVEDAD;
-            contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
+    public void aplicarGravedad(long now) {
+    velocidadY += GRAVEDAD;
+    contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
 
-            boolean colisionDesdeAbajo = false;
+    boolean enPlataforma = false;
 
-            for (Plataforma p : plataformas) {
-                if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
-                    colisionDesdeAbajo = true;
-                    velocidadY = 0;
-                    break;
-                }
-            }
+    for (Plataforma p : plataformas) {
+        // Si el personaje cae sobre la plataforma
+        if (p.detectarColisionDesdeArriba(contenedor, velocidadY)) {
+            System.out.println("Toco arriba");
+            enPlataforma = true;
+            velocidadY = 0;
+            saltando = false;
+            contenedor.setLayoutY(p.getBounds().getMinY() - contenedor.getHeight()); // Justo encima
+            break;
+        }
 
-            if (contenedor.getLayoutY() >= Y_SUELO) {
-                contenedor.setLayoutY(Y_SUELO);
-                saltando = false;
-                velocidadY = 0;
-            }
+        // Si el personaje choca desde abajo (al saltar)
+        if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
+            System.out.println("Toco abajo");
+            velocidadY = 0;
+            break;
         }
     }
+
+    // Si llega al suelo
+    if (contenedor.getLayoutY() >= Y_SUELO) {
+        contenedor.setLayoutY(Y_SUELO);
+        velocidadY = 0;
+        saltando = false;
+    }
+
+    // Si no está en el suelo ni en plataforma, sigue en el aire
+    if (!enPlataforma && contenedor.getLayoutY() < Y_SUELO) {
+        saltando = true;
+    }
+}
+
+
+
+
+
+
+
 
     private void animar(long now) {
         if (saltando) {

@@ -17,21 +17,22 @@ public class Plataforma {
 
     // Detectar colisión desde arriba
     public boolean detectarColisionDesdeArriba(Node personaje, double velocidadY) {
-        Bounds pjBounds = personaje.getBoundsInParent();
-        Bounds plataformaBounds = getBounds();
+    Bounds pjBounds = personaje.getBoundsInParent();
+    Bounds plataformaBounds = getBounds();
 
-        boolean intersecta = pjBounds.intersects(plataformaBounds);
-        boolean caeDesdeArriba = velocidadY > 0
-                && pjBounds.getMaxY() <= plataformaBounds.getMinY() + 10
-                && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
-                && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10;
+    boolean intersecta = pjBounds.intersects(plataformaBounds);
 
-        if (intersecta && caeDesdeArriba) {
-            personaje.setLayoutY(plataformaBounds.getMinY() - pjBounds.getHeight());
-            return true;
-        }
-        return false;
+    boolean caeEncima = velocidadY > 0 // El personaje se está moviendo hacia abajo
+            && pjBounds.getMaxY() >= plataformaBounds.getMinY()
+            && pjBounds.getMaxY() - velocidadY <= plataformaBounds.getMinY()
+            && pjBounds.getMaxX() > plataformaBounds.getMinX() + 10
+            && pjBounds.getMinX() < plataformaBounds.getMaxX() - 10;
+
+    if (intersecta && caeEncima) {
+        return true;
     }
+    return false;
+}
 
     // Detectar colisión desde abajo
     public boolean detectarColisionDesdeAbajo(Node personaje, double velocidadY) {

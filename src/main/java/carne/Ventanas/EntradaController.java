@@ -20,6 +20,7 @@ public class EntradaController implements Initializable {
     private Personaje personaje;
     private Personaje personaje1;
     private Plataforma plataforma1;
+    private Plataforma plataforma2;
     List<Plataforma> plataformas;
     @FXML
     private AnchorPane rootPane;
@@ -34,7 +35,8 @@ public class EntradaController implements Initializable {
     private Pane PanePJ2;
     @FXML
     private Pane Plataforma;
-    
+    @FXML
+    private Pane Plataforma2;
     //chica sprites
     Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
     Image DerPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
@@ -59,7 +61,9 @@ public class EntradaController implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         plataformas = new ArrayList();
         plataforma1 = new Plataforma(Plataforma);
+        plataforma2 = new Plataforma(Plataforma2);
         plataformas.add(plataforma1);
+        plataformas.add(plataforma2);
         personaje = new Personaje(rootPane, PanePJ1,ImagenPJ, DerPaso1Chica, DerPaso2Chica,
                 IzqPaso1Chica, IzqPaso2Chica, DerIdleChica,
                 IzqIdleChica, TransicionIzqChica, TransicionDerChica);
