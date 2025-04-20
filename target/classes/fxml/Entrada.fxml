@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import java.net.URL?>
+<?import javafx.scene.image.Image?>
 <?import javafx.scene.image.ImageView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.Pane?>
@@ -12,11 +13,25 @@
    <children>
       <AnchorPane fx:id="rootPane" prefHeight="1080.0" prefWidth="1920.0">
          <children>
-            <ImageView fx:id="ImagenPJ" fitHeight="129.0" fitWidth="82.0" layoutX="59.0" layoutY="527.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje" />
             <Pane fx:id="Plataforma" layoutX="499.0" layoutY="540.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
-            <Pane fx:id="Plataforma1" layoutX="862.0" layoutY="512.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
-            <Pane fx:id="Plataforma2" layoutX="1109.0" layoutY="407.0" prefHeight="30.0" prefWidth="114.0" styleClass="Plataforma" />
-            <ImageView fx:id="ImagenPJ1" fitHeight="129.0" fitWidth="82.0" layoutX="192.0" layoutY="527.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje" />
+            <Pane fx:id="PanePJ1" layoutX="38.0" layoutY="521.0" prefHeight="82.0" prefWidth="76.0">
+               <children>
+                  <ImageView fx:id="ImagenPJ" fitHeight="129.0" fitWidth="82.0" layoutX="-3.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje">
+                     <image>
+                        <Image url="@../Imagenes/Chica/izq%20idle.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </Pane>
+            <Pane fx:id="PanePJ2" layoutX="169.0" layoutY="521.0" prefHeight="82.0" prefWidth="76.0">
+               <children>
+                  <ImageView fx:id="ImagenPJ1" fitHeight="129.0" fitWidth="82.0" layoutX="-1.0" pickOnBounds="true" preserveRatio="true" styleClass="Personaje">
+                     <image>
+                        <Image url="@../Imagenes/Chico/der%20idle.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </Pane>
          </children>
       </AnchorPane>
    </children>

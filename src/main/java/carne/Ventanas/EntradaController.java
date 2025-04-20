@@ -10,6 +10,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.image.ImageView;
 import carne.Clases.Personaje; // Importación de la nueva clase
 import javafx.scene.image.Image;
+import javafx.scene.layout.Pane;
 
 public class EntradaController implements Initializable {
 
@@ -21,7 +22,12 @@ public class EntradaController implements Initializable {
     private ImageView ImagenPJ;  // El ImageView que representa al personaje
     @FXML
     private ImageView ImagenPJ1;
-
+    
+    @FXML
+    private Pane PanePJ1;
+    @FXML
+    private Pane PanePJ2;
+    
     //chica sprites
     Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
     Image DerPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
@@ -44,17 +50,17 @@ public class EntradaController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        personaje = new Personaje(rootPane, ImagenPJ, DerPaso1Chica, DerPaso2Chica,
+        personaje = new Personaje(rootPane, PanePJ1,ImagenPJ, DerPaso1Chica, DerPaso2Chica,
                 IzqPaso1Chica, IzqPaso2Chica, DerIdleChica,
                 IzqIdleChica, TransicionIzqChica, TransicionDerChica);
 
-        personaje1 = new Personaje(rootPane, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
+        personaje1 = new Personaje(rootPane,PanePJ2, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
                 IzqPaso1Chico, IzqPaso2Chico, DerIdleChico,
                 IzqIdleChico, TransicionIzqChico, TransicionDerChico);
         configurarEventosTeclado();
         iniciarBucleJuego();
         rootPane.requestFocus();  // Solicita el foco para que el rootPane reciba eventos de teclado
-        rootPane.setFocusTraversable(true);  // Asegúrate de que el rootPane es traversable
+        rootPane.setFocusTraversable(true);  //  rootPane es traversable
     }
 
     private void configurarEventosTeclado() {

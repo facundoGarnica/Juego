@@ -4,38 +4,43 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
+import java.util.List;
 
 public class Personaje {
-    private ImageView sprite;  // El ImageView que representará al personaje
+    private Pane contenedor;  // Pane que se moverá (el personaje en sí)
+    private ImageView sprite;  // Imagen del personaje (para mostrar los sprites)
     private AnchorPane root;
-    
+    private List<Plataforma> plataformas;
+
     private boolean izquierdaPresionada = false;
     private boolean derechaPresionada = false;
     private boolean saltando = false;
-    
+
     private double velocidadY = 0;
     private double velocidadX = 3.0;
     private final double GRAVEDAD = 0.3;
     private final double FUERZA_SALTO = -10;
     private final double Y_SUELO = 527.0;
-    
-    private boolean mirandoADerecha = true;  // Dirección de la imagen
-    
+
+    private boolean mirandoADerecha = true;
+
     private Image imgCaminarIzquierda1, imgCaminarIzquierda2;
     private Image imgCaminarDerecha1, imgCaminarDerecha2;
     private Image imgIdleIzquierda, imgIdleDerecha;
     private Image imgtransicionIzquierda, imgtransicionDerecha;
-    
+
     private long ultimoCambioFrame = 0;
     private int estadoAnimacion = 0;
     private final long INTERVALO_CAMBIO_FRAME = 250_000_000;
 
-    // Constructor con el ImageView y las imágenes como parámetros
-    public Personaje(AnchorPane root, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
-                     Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda, 
+    public Personaje(AnchorPane root, Pane contenedor, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
+                     Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda,
                      Image imgIdleDerecha, Image imgtransicionIzquierda, Image imgtransicionDerecha) {
         this.root = root;
-        this.sprite = sprite;  // Usamos el ImageView pasado desde EntradaController
+        this.contenedor = contenedor;
+        this.sprite = sprite;
+
         this.imgCaminarIzquierda1 = imgCaminarIzquierda1;
         this.imgCaminarIzquierda2 = imgCaminarIzquierda2;
         this.imgCaminarDerecha1 = imgCaminarDerecha1;
@@ -44,126 +49,85 @@ public class Personaje {
         this.imgIdleDerecha = imgIdleDerecha;
         this.imgtransicionIzquierda = imgtransicionIzquierda;
         this.imgtransicionDerecha = imgtransicionDerecha;
-        
-        System.out.println("Personaje creado con ImageView: " + sprite);
+
         configurarPersonaje();
     }
-    
-    // Método setter para establecer las imágenes
-    public void setSprites(Image imgCaminarIzquierda1, Image imgCaminarIzquierda2, Image imgCaminarDerecha1,
-                           Image imgCaminarDerecha2, Image imgIdleIzquierda, Image imgIdleDerecha,
-                           Image imgtransicionIzquierda, Image imgtransicionDerecha) {
-        this.imgCaminarIzquierda1 = imgCaminarIzquierda1;
-        this.imgCaminarIzquierda2 = imgCaminarIzquierda2;
-        this.imgCaminarDerecha1 = imgCaminarDerecha1;
-        this.imgCaminarDerecha2 = imgCaminarDerecha2;
-        this.imgIdleIzquierda = imgIdleIzquierda;
-        this.imgIdleDerecha = imgIdleDerecha;
-        this.imgtransicionIzquierda = imgtransicionIzquierda;
-        this.imgtransicionDerecha = imgtransicionDerecha;
+
+    public void setPlataformas(List<Plataforma> plataformas) {
+        this.plataformas = plataformas;
     }
 
     private void configurarPersonaje() {
-        sprite.setLayoutX(100);
-        sprite.setLayoutY(Y_SUELO);
-        sprite.setImage(imgIdleDerecha);  // Asumimos que empieza mirando a la derecha
-        System.out.println("Posición inicial del personaje: " + sprite.getLayoutX() + ", " + sprite.getLayoutY());
+        contenedor.setLayoutY(Y_SUELO);
+        sprite.setImage(imgIdleDerecha);
     }
 
     public void presionarTecla(KeyCode code) {
-        if (null != code) {
-            System.out.println("Tecla presionada: " + code);
-            switch (code) {
-                case LEFT:
-                    izquierdaPresionada = true;
-                    mirandoADerecha = false;  // Cambiar la dirección a izquierda
-                    break;
-                case RIGHT:
-                    derechaPresionada = true;
-                    mirandoADerecha = true;  // Cambiar la dirección a derecha
-                    break;
-                case SPACE:
-                    if (!saltando) {
-                        saltando = true;
-                        velocidadY = FUERZA_SALTO;
-                        System.out.println("Iniciando salto");
-                    }
-                    break;
-                default:
-                    break;
+        switch (code) {
+            case LEFT -> {
+                izquierdaPresionada = true;
+                mirandoADerecha = false;
+            }
+            case RIGHT -> {
+                derechaPresionada = true;
+                mirandoADerecha = true;
+            }
+            case SPACE -> {
+                if (!saltando) {
+                    saltando = true;
+                    velocidadY = FUERZA_SALTO;
+                }
             }
         }
     }
 
     public void soltarTecla(KeyCode code) {
-        if (code == KeyCode.LEFT) {
-            izquierdaPresionada = false;
-        } else if (code == KeyCode.RIGHT) {
-            derechaPresionada = false;
-        }
-        System.out.println("Tecla soltada: " + code);
+        if (code == KeyCode.LEFT) izquierdaPresionada = false;
+        if (code == KeyCode.RIGHT) derechaPresionada = false;
     }
 
     public void actualizar(long now) {
-        actualizarMovimientoLateral(now);
-        actualizarSaltoYGravedad(now);
-        actualizarAnimacion(now);
+        moverHorizontal(now);
+        aplicarGravedad(now);
+        animar(now);
     }
 
-    private void actualizarMovimientoLateral(long now) {
-        double nuevaX = sprite.getLayoutX();
+    private void moverHorizontal(long now) {
+        double nuevaX = contenedor.getLayoutX();
 
         if (izquierdaPresionada) {
             nuevaX -= velocidadX;
             if (nuevaX >= 0) {
-                sprite.setLayoutX(nuevaX);
-                System.out.println("Moviendo a la izquierda, nueva X: " + nuevaX);
+                contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
             }
         } else if (derechaPresionada) {
             nuevaX += velocidadX;
-            if (nuevaX + sprite.getBoundsInParent().getWidth() <= root.getWidth()) {
-                sprite.setLayoutX(nuevaX);
-                System.out.println("Moviendo a la derecha, nueva X: " + nuevaX);
+            if (nuevaX + contenedor.getWidth() <= root.getWidth()) {
+                contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
             }
         } else if (!saltando) {
-            if (mirandoADerecha) {
-                sprite.setImage(imgIdleDerecha);
-            } else {
-                sprite.setImage(imgIdleIzquierda);
-            }
+            sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
         }
     }
 
-    private void actualizarSaltoYGravedad(long now) {
+    private void aplicarGravedad(long now) {
         if (saltando) {
             velocidadY += GRAVEDAD;
-            sprite.setLayoutY(sprite.getLayoutY() + velocidadY);
+            contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
 
-            if (sprite.getLayoutY() >= Y_SUELO) {
-                sprite.setLayoutY(Y_SUELO);
+            if (contenedor.getLayoutY() >= Y_SUELO) {
+                contenedor.setLayoutY(Y_SUELO);
                 saltando = false;
                 velocidadY = 0;
-                if (izquierdaPresionada) {
-                    sprite.setImage(imgIdleIzquierda);
-                } else if (derechaPresionada) {
-                    sprite.setImage(imgIdleDerecha);
-                }
-                System.out.println("Salto terminado, posición Y: " + sprite.getLayoutY());
             }
         }
     }
 
-    private void actualizarAnimacion(long now) {
+    private void animar(long now) {
         if (saltando) {
-            if (izquierdaPresionada) {
-                cambiarImagenCaminarIzquierda(now);
-            } else if (derechaPresionada) {
-                cambiarImagenCaminarDerecha(now);
-            } else {
-                sprite.setImage(mirandoADerecha ? imgtransicionDerecha : imgtransicionIzquierda);
-            }
+            sprite.setImage(mirandoADerecha ? imgtransicionDerecha : imgtransicionIzquierda);
         } else if (izquierdaPresionada) {
             cambiarImagenCaminarIzquierda(now);
         } else if (derechaPresionada) {
@@ -174,45 +138,31 @@ public class Personaje {
     private void cambiarImagenCaminarIzquierda(long now) {
         if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
             switch (estadoAnimacion) {
-                case 0:
-                    sprite.setImage(imgCaminarIzquierda1);
-                    break;
-                case 1:
-                    sprite.setImage(imgtransicionIzquierda);
-                    break;
-                case 2:
-                    sprite.setImage(imgCaminarIzquierda2);
-                    break;
-                case 3:
-                    sprite.setImage(imgtransicionIzquierda);
-                    break;
+                case 0 -> sprite.setImage(imgCaminarIzquierda1);
+                case 1 -> sprite.setImage(imgtransicionIzquierda);
+                case 2 -> sprite.setImage(imgCaminarIzquierda2);
+                case 3 -> sprite.setImage(imgtransicionIzquierda);
             }
             estadoAnimacion = (estadoAnimacion + 1) % 4;
             ultimoCambioFrame = now;
-            System.out.println("Cambiando imagen caminar izquierda, estado animación: " + estadoAnimacion);
         }
     }
 
     private void cambiarImagenCaminarDerecha(long now) {
         if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
             switch (estadoAnimacion) {
-                case 0:
-                    sprite.setImage(imgCaminarDerecha1);
-                    break;
-                case 1:
-                    sprite.setImage(imgtransicionDerecha);
-                    break;
-                case 2:
-                    sprite.setImage(imgCaminarDerecha2);
-                    break;
-                case 3:
-                    sprite.setImage(imgtransicionDerecha);
-                    break;
+                case 0 -> sprite.setImage(imgCaminarDerecha1);
+                case 1 -> sprite.setImage(imgtransicionDerecha);
+                case 2 -> sprite.setImage(imgCaminarDerecha2);
+                case 3 -> sprite.setImage(imgtransicionDerecha);
             }
             estadoAnimacion = (estadoAnimacion + 1) % 4;
             ultimoCambioFrame = now;
-            System.out.println("Cambiando imagen caminar derecha, estado animación: " + estadoAnimacion);
         }
+    }
+
+    public Pane getContenedor() {
+        return contenedor;
     }
 
     public ImageView getSprite() {
