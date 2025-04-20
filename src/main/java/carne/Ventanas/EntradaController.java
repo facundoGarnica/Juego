@@ -9,6 +9,9 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.image.ImageView;
 import carne.Clases.Personaje; // Importación de la nueva clase
+import carne.Clases.Plataforma;
+import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.image.Image;
 import javafx.scene.layout.Pane;
 
@@ -16,6 +19,8 @@ public class EntradaController implements Initializable {
 
     private Personaje personaje;
     private Personaje personaje1;
+    private Plataforma plataforma1;
+    List<Plataforma> plataformas;
     @FXML
     private AnchorPane rootPane;
     @FXML
@@ -27,6 +32,8 @@ public class EntradaController implements Initializable {
     private Pane PanePJ1;
     @FXML
     private Pane PanePJ2;
+    @FXML
+    private Pane Plataforma;
     
     //chica sprites
     Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
@@ -50,13 +57,17 @@ public class EntradaController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        plataformas = new ArrayList();
+        plataforma1 = new Plataforma(Plataforma);
+        plataformas.add(plataforma1);
         personaje = new Personaje(rootPane, PanePJ1,ImagenPJ, DerPaso1Chica, DerPaso2Chica,
                 IzqPaso1Chica, IzqPaso2Chica, DerIdleChica,
                 IzqIdleChica, TransicionIzqChica, TransicionDerChica);
-
+        personaje.setPlataformas(plataformas);
         personaje1 = new Personaje(rootPane,PanePJ2, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
                 IzqPaso1Chico, IzqPaso2Chico, DerIdleChico,
                 IzqIdleChico, TransicionIzqChico, TransicionDerChico);
+        personaje1.setPlataformas(plataformas);
         configurarEventosTeclado();
         iniciarBucleJuego();
         rootPane.requestFocus();  // Solicita el foco para que el rootPane reciba eventos de teclado

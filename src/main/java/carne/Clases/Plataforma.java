@@ -1,7 +1,7 @@
 package carne.Clases;
 
 import javafx.geometry.Bounds;
-import javafx.scene.image.ImageView;
+import javafx.scene.Node;
 import javafx.scene.layout.Pane;
 
 public class Plataforma {
@@ -15,7 +15,8 @@ public class Plataforma {
         return plataforma.getBoundsInParent();
     }
 
-    public boolean detectarColisionDesdeArriba(ImageView personaje, double velocidadY) {
+    // Detectar colisión desde arriba
+    public boolean detectarColisionDesdeArriba(Node personaje, double velocidadY) {
         Bounds pjBounds = personaje.getBoundsInParent();
         Bounds plataformaBounds = getBounds();
 
@@ -32,7 +33,8 @@ public class Plataforma {
         return false;
     }
 
-    public boolean detectarColisionDesdeAbajo(ImageView personaje, double velocidadY) {
+    // Detectar colisión desde abajo
+    public boolean detectarColisionDesdeAbajo(Node personaje, double velocidadY) {
         Bounds pjBounds = personaje.getBoundsInParent();
         Bounds plataformaBounds = getBounds();
 
@@ -49,7 +51,8 @@ public class Plataforma {
         return false;
     }
 
-    public boolean detectarColisionLateralIzquierda(ImageView personaje, double velocidadX) {
+    // Detectar colisión desde la izquierda
+    public boolean detectarColisionLateralIzquierda(Node personaje, double velocidadX) {
         Bounds pjBounds = personaje.getBoundsInParent();
         Bounds plataformaBounds = getBounds();
 
@@ -66,7 +69,8 @@ public class Plataforma {
         return false;
     }
 
-    public boolean detectarColisionLateralDerecha(ImageView personaje, double velocidadX) {
+    // Detectar colisión desde la derecha
+    public boolean detectarColisionLateralDerecha(Node personaje, double velocidadX) {
         Bounds pjBounds = personaje.getBoundsInParent();
         Bounds plataformaBounds = getBounds();
 

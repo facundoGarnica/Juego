@@ -1,5 +1,6 @@
 package carne.Clases;
 
+import java.util.ArrayList;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
@@ -8,8 +9,8 @@ import javafx.scene.layout.Pane;
 import java.util.List;
 
 public class Personaje {
-    private Pane contenedor;  // Pane que se moverá (el personaje en sí)
-    private ImageView sprite;  // Imagen del personaje (para mostrar los sprites)
+    private Pane contenedor;
+    private ImageView sprite;
     private AnchorPane root;
     private List<Plataforma> plataformas;
 
@@ -50,6 +51,7 @@ public class Personaje {
         this.imgtransicionIzquierda = imgtransicionIzquierda;
         this.imgtransicionDerecha = imgtransicionDerecha;
 
+        this.plataformas = new ArrayList<>();
         configurarPersonaje();
     }
 
@@ -94,16 +96,33 @@ public class Personaje {
 
     private void moverHorizontal(long now) {
         double nuevaX = contenedor.getLayoutX();
+        boolean colision = false;
 
         if (izquierdaPresionada) {
             nuevaX -= velocidadX;
-            if (nuevaX >= 0) {
+
+            for (Plataforma p : plataformas) {
+                if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
+                    colision = true;
+                    break;
+                }
+            }
+
+            if (!colision && nuevaX >= 0) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
             }
         } else if (derechaPresionada) {
             nuevaX += velocidadX;
-            if (nuevaX + contenedor.getWidth() <= root.getWidth()) {
+
+            for (Plataforma p : plataformas) {
+                if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
+                    colision = true;
+                    break;
+                }
+            }
+
+            if (!colision && nuevaX + contenedor.getWidth() <= root.getWidth()) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
             }
@@ -116,6 +135,16 @@ public class Personaje {
         if (saltando) {
             velocidadY += GRAVEDAD;
             contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
+
+            boolean colisionDesdeAbajo = false;
+
+            for (Plataforma p : plataformas) {
+                if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
+                    colisionDesdeAbajo = true;
+                    velocidadY = 0;
+                    break;
+                }
+            }
 
             if (contenedor.getLayoutY() >= Y_SUELO) {
                 contenedor.setLayoutY(Y_SUELO);
