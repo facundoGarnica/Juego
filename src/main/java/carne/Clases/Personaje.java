@@ -33,7 +33,7 @@ public class Personaje {
 
     private long ultimoCambioFrame = 0;
     private int estadoAnimacion = 0;
-    private final long INTERVALO_CAMBIO_FRAME = 250_000_000;
+    private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
 
     public Personaje(AnchorPane root, Pane contenedor, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
                      Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda,
@@ -177,14 +177,16 @@ public class Personaje {
 
 
     private void animar(long now) {
-        if (saltando) {
-            sprite.setImage(mirandoADerecha ? imgtransicionDerecha : imgtransicionIzquierda);
-        } else if (izquierdaPresionada) {
-            cambiarImagenCaminarIzquierda(now);
-        } else if (derechaPresionada) {
-            cambiarImagenCaminarDerecha(now);
-        }
+    if (saltando) {
+        // Cambiar el sprite del salto a la imagen de caminar dependiendo de la dirección
+        sprite.setImage(mirandoADerecha ? imgCaminarDerecha1 : imgCaminarIzquierda1);
+    } else if (izquierdaPresionada) {
+        cambiarImagenCaminarIzquierda(now);
+    } else if (derechaPresionada) {
+        cambiarImagenCaminarDerecha(now);
     }
+}
+
 
     private void cambiarImagenCaminarIzquierda(long now) {
         if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
