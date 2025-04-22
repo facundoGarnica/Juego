@@ -35,6 +35,12 @@ public class Personaje {
     private int estadoAnimacion = 0;
     private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
 
+    // Nuevas variables para los panes
+    private Pane CambiarIzquierda;
+    private Pane CambiarDerecha;
+
+    private double velocidadCamara = 1.5; // Velocidad de movimiento de la cámara
+
     public Personaje(AnchorPane root, Pane contenedor, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
                      Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda,
                      Image imgIdleDerecha, Image imgtransicionIzquierda, Image imgtransicionDerecha) {
@@ -53,6 +59,12 @@ public class Personaje {
 
         this.plataformas = new ArrayList<>();
         configurarPersonaje();
+    }
+
+    // Métodos para asignar los panes
+    public void setPanes(Pane CambiarIzquierda, Pane CambiarDerecha) {
+        this.CambiarIzquierda = CambiarIzquierda;
+        this.CambiarDerecha = CambiarDerecha;
     }
 
     public void setPlataformas(List<Plataforma> plataformas) {
@@ -94,13 +106,20 @@ public class Personaje {
         animar(now);
     }
 
-    private void moverHorizontal(long now) {
-        double nuevaX = contenedor.getLayoutX();
-        boolean colision = false;
+    public void moverHorizontal(long now) {
+    double nuevaX = contenedor.getLayoutX();
+    boolean colision = false;
 
-        if (izquierdaPresionada) {
-            nuevaX -= velocidadX;
+    if (izquierdaPresionada) {
+        nuevaX -= velocidadX;
 
+        // Verificar si el personaje toca el borde izquierdo y mover la cámara
+        if (contenedor.getBoundsInParent().intersects(CambiarIzquierda.getBoundsInParent())) {
+            double desplazamientoCamara = velocidadCamara;
+            root.setTranslateX(root.getTranslateX() + desplazamientoCamara);
+            contenedor.setLayoutX(nuevaX + desplazamientoCamara);  // Mover al personaje junto con la cámara
+            CambiarIzquierda.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
+        } else {
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
                     colision = true;
@@ -111,10 +130,19 @@ public class Personaje {
             if (!colision && nuevaX >= 0) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
+                CambiarIzquierda.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
             }
-        } else if (derechaPresionada) {
-            nuevaX += velocidadX;
+        }
+    } else if (derechaPresionada) {
+        nuevaX += velocidadX;
 
+        // Verificar si el personaje toca el borde derecho y mover la cámara
+        if (contenedor.getBoundsInParent().intersects(CambiarDerecha.getBoundsInParent())) {
+            double desplazamientoCamara = velocidadCamara;
+            root.setTranslateX(root.getTranslateX() - desplazamientoCamara);
+            contenedor.setLayoutX(nuevaX - desplazamientoCamara);  // Mover al personaje junto con la cámara
+            CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
+        } else {
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
                     colision = true;
@@ -125,68 +153,57 @@ public class Personaje {
             if (!colision && nuevaX + contenedor.getWidth() <= root.getWidth()) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
+                CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
             }
-        } else if (!saltando) {
-            sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
         }
+    } else if (!saltando) {
+        sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
     }
+}
+
+
 
     public void aplicarGravedad(long now) {
-    velocidadY += GRAVEDAD;
-    contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
+        velocidadY += GRAVEDAD;
+        contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
 
-    boolean enPlataforma = false;
+        boolean enPlataforma = false;
 
-    for (Plataforma p : plataformas) {
-        // Si el personaje cae sobre la plataforma
-        if (p.detectarColisionDesdeArriba(contenedor, velocidadY)) {
-            System.out.println("Toco arriba");
-            enPlataforma = true;
+        for (Plataforma p : plataformas) {
+            if (p.detectarColisionDesdeArriba(contenedor, velocidadY)) {
+                enPlataforma = true;
+                velocidadY = 0;
+                saltando = false;
+                contenedor.setLayoutY(p.getBounds().getMinY() - contenedor.getHeight());
+                break;
+            }
+
+            if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
+                velocidadY = 0;
+                break;
+            }
+        }
+
+        if (contenedor.getLayoutY() >= Y_SUELO) {
+            contenedor.setLayoutY(Y_SUELO);
             velocidadY = 0;
             saltando = false;
-            contenedor.setLayoutY(p.getBounds().getMinY() - contenedor.getHeight()); // Justo encima
-            break;
         }
 
-        // Si el personaje choca desde abajo (al saltar)
-        if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
-            System.out.println("Toco abajo");
-            velocidadY = 0;
-            break;
+        if (!enPlataforma && contenedor.getLayoutY() < Y_SUELO) {
+            saltando = true;
         }
     }
-
-    // Si llega al suelo
-    if (contenedor.getLayoutY() >= Y_SUELO) {
-        contenedor.setLayoutY(Y_SUELO);
-        velocidadY = 0;
-        saltando = false;
-    }
-
-    // Si no está en el suelo ni en plataforma, sigue en el aire
-    if (!enPlataforma && contenedor.getLayoutY() < Y_SUELO) {
-        saltando = true;
-    }
-}
-
-
-
-
-
-
-
 
     private void animar(long now) {
-    if (saltando) {
-        // Cambiar el sprite del salto a la imagen de caminar dependiendo de la dirección
-        sprite.setImage(mirandoADerecha ? imgCaminarDerecha1 : imgCaminarIzquierda1);
-    } else if (izquierdaPresionada) {
-        cambiarImagenCaminarIzquierda(now);
-    } else if (derechaPresionada) {
-        cambiarImagenCaminarDerecha(now);
+        if (saltando) {
+            sprite.setImage(mirandoADerecha ? imgCaminarDerecha1 : imgCaminarIzquierda1);
+        } else if (izquierdaPresionada) {
+            cambiarImagenCaminarIzquierda(now);
+        } else if (derechaPresionada) {
+            cambiarImagenCaminarDerecha(now);
+        }
     }
-}
-
 
     private void cambiarImagenCaminarIzquierda(long now) {
         if (now - ultimoCambioFrame > INTERVALO_CAMBIO_FRAME) {
