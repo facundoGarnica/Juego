@@ -1,12 +1,12 @@
 package carne.Clases;
 
 import java.util.ArrayList;
+import java.util.List;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.Pane;
-import java.util.List;
 
 public class Personaje {
     private Pane contenedor;
@@ -35,15 +35,21 @@ public class Personaje {
     private int estadoAnimacion = 0;
     private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
 
-    // Nuevas variables para los panes
     private Pane CambiarIzquierda;
     private Pane CambiarDerecha;
 
-    private double velocidadCamara = 1.5; // Velocidad de movimiento de la cámara
+    private boolean bordeIzquierdoPegado = false;
+    private boolean bordeDerechoPegado = false;
+    private double distanciaEntreBordes = -1;
 
-    public Personaje(AnchorPane root, Pane contenedor, ImageView sprite, Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
-                     Image imgCaminarDerecha1, Image imgCaminarDerecha2, Image imgIdleIzquierda,
-                     Image imgIdleDerecha, Image imgtransicionIzquierda, Image imgtransicionDerecha) {
+    private double velocidadCamara = 1.5;
+
+    public Personaje(AnchorPane root, Pane contenedor, ImageView sprite,
+                     Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
+                     Image imgCaminarDerecha1, Image imgCaminarDerecha2,
+                     Image imgIdleIzquierda, Image imgIdleDerecha,
+                     Image imgtransicionIzquierda, Image imgtransicionDerecha) {
+
         this.root = root;
         this.contenedor = contenedor;
         this.sprite = sprite;
@@ -61,7 +67,6 @@ public class Personaje {
         configurarPersonaje();
     }
 
-    // Métodos para asignar los panes
     public void setPanes(Pane CambiarIzquierda, Pane CambiarDerecha) {
         this.CambiarIzquierda = CambiarIzquierda;
         this.CambiarDerecha = CambiarDerecha;
@@ -106,20 +111,36 @@ public class Personaje {
         animar(now);
     }
 
-    public void moverHorizontal(long now) {
+   public void moverHorizontal(long now) {
     double nuevaX = contenedor.getLayoutX();
     boolean colision = false;
 
     if (izquierdaPresionada) {
         nuevaX -= velocidadX;
 
-        // Verificar si el personaje toca el borde izquierdo y mover la cámara
+        // Verificamos la colisión con el borde izquierdo
         if (contenedor.getBoundsInParent().intersects(CambiarIzquierda.getBoundsInParent())) {
+            if (!bordeIzquierdoPegado) {
+                bordeIzquierdoPegado = true;
+                bordeDerechoPegado = false;
+                distanciaEntreBordes = CambiarDerecha.getLayoutX() - (contenedor.getLayoutX() + contenedor.getWidth());
+            }
+
+            // Desplazamos la cámara hacia la izquierda
             double desplazamientoCamara = velocidadCamara;
             root.setTranslateX(root.getTranslateX() + desplazamientoCamara);
-            contenedor.setLayoutX(nuevaX + desplazamientoCamara);  // Mover al personaje junto con la cámara
-            CambiarIzquierda.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
+            contenedor.setLayoutX(nuevaX + desplazamientoCamara);
+            CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - CambiarIzquierda.getWidth()); // Ajusta la posición del borde izquierdo
+            CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth() + distanciaEntreBordes);
+            
+            // Aseguramos que CambiarIzquierda esté en frente del personaje
+            CambiarIzquierda.toFront();  // Esto asegura que se posicione por encima del personaje
+            CambiarDerecha.toFront();
         } else {
+            bordeIzquierdoPegado = false;
+            distanciaEntreBordes = -1;
+
+            // Revisamos si hay colisiones con plataformas
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
                     colision = true;
@@ -127,22 +148,38 @@ public class Personaje {
                 }
             }
 
+            // Si no hay colisión, actualizamos la posición del contenedor
             if (!colision && nuevaX >= 0) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
-                CambiarIzquierda.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
             }
         }
     } else if (derechaPresionada) {
         nuevaX += velocidadX;
 
-        // Verificar si el personaje toca el borde derecho y mover la cámara
+        // Verificamos la colisión con el borde derecho
         if (contenedor.getBoundsInParent().intersects(CambiarDerecha.getBoundsInParent())) {
+            if (!bordeDerechoPegado) {
+                bordeDerechoPegado = true;
+                bordeIzquierdoPegado = false;
+                distanciaEntreBordes = (contenedor.getLayoutX()) - CambiarIzquierda.getLayoutX();
+            }
+
+            // Desplazamos la cámara hacia la derecha
             double desplazamientoCamara = velocidadCamara;
             root.setTranslateX(root.getTranslateX() - desplazamientoCamara);
-            contenedor.setLayoutX(nuevaX - desplazamientoCamara);  // Mover al personaje junto con la cámara
-            CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
+            contenedor.setLayoutX(nuevaX - desplazamientoCamara);
+            CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());
+            CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - distanciaEntreBordes);
+            
+            // Aseguramos que CambiarIzquierda esté en frente del personaje
+            CambiarIzquierda.toFront();
+            CambiarDerecha.toFront();
         } else {
+            bordeDerechoPegado = false;
+            distanciaEntreBordes = -1;
+
+            // Revisamos si hay colisiones con plataformas
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
                     colision = true;
@@ -150,16 +187,19 @@ public class Personaje {
                 }
             }
 
+            // Si no hay colisión, actualizamos la posición del contenedor
             if (!colision && nuevaX + contenedor.getWidth() <= root.getWidth()) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
-                CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());  // Mantener el Pane a la derecha
             }
         }
     } else if (!saltando) {
+        // Si no hay movimiento horizontal, mostramos la imagen estática
         sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
     }
 }
+
+
 
 
 
