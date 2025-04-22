@@ -139,16 +139,21 @@ public class Personaje {
                 distanciaEntreBordes = CambiarDerecha.getLayoutX() - (contenedor.getLayoutX() + contenedor.getWidth());
             }
 
-            // Se permite mover el mapa solo si el otro personaje no lo está haciendo también
-            if (!otroTocandoIzquierdo || this == getPrioridadControlador()) {
+            if (!otroTocandoDerecho && (!otroTocandoIzquierdo || this == getPrioridadControlador())) {
                 double desplazamientoCamara = velocidadCamara;
                 root.setTranslateX(root.getTranslateX() + desplazamientoCamara);
                 contenedor.setLayoutX(nuevaX + desplazamientoCamara);
-                CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - CambiarIzquierda.getWidth());
-                CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth() + distanciaEntreBordes);
+
+                // Solo mover los Pane si ambos no están tocando sus bordes
+                if (!(otroTocandoIzquierdo && otroTocandoDerecho)) {
+                    CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - CambiarIzquierda.getWidth());
+                    CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth() + distanciaEntreBordes);
+                }
+
                 CambiarIzquierda.toFront();
                 CambiarDerecha.toFront();
             }
+
         } else {
             bordeIzquierdoPegado = false;
             distanciaEntreBordes = -1;
@@ -176,15 +181,21 @@ public class Personaje {
                 distanciaEntreBordes = (contenedor.getLayoutX()) - CambiarIzquierda.getLayoutX();
             }
 
-            if (!otroTocandoDerecho || this == getPrioridadControlador()) {
+            if (!otroTocandoIzquierdo && (!otroTocandoDerecho || this == getPrioridadControlador())) {
                 double desplazamientoCamara = velocidadCamara;
                 root.setTranslateX(root.getTranslateX() - desplazamientoCamara);
                 contenedor.setLayoutX(nuevaX - desplazamientoCamara);
-                CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());
-                CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - distanciaEntreBordes);
+
+                // Solo mover los Pane si ambos no están tocando sus bordes
+                if (!(otroTocandoIzquierdo && otroTocandoDerecho)) {
+                    CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());
+                    CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - distanciaEntreBordes);
+                }
+
                 CambiarIzquierda.toFront();
                 CambiarDerecha.toFront();
             }
+
         } else {
             bordeDerechoPegado = false;
             distanciaEntreBordes = -1;
@@ -206,6 +217,7 @@ public class Personaje {
         sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
     }
 }
+
 
 
     public void aplicarGravedad(long now) {
