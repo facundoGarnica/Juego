@@ -93,7 +93,8 @@ public class EntradaController implements Initializable {
         personajes.add(personaje);
         personajes.add(personaje1);
         // Asignar la lista de otros personajes a cada uno
-        //personaje.setOtrosPersonajes(personajes);
+        personaje.setOtroPersonaje(personaje1);
+        personaje1.setOtroPersonaje(personaje);
        // personaje1.setOtrosPersonajes(personajes);
 
     }
