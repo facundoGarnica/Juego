@@ -50,6 +50,12 @@ public class EntradaController implements Initializable {
     private Pane Moneda1;
     @FXML
     private Pane Moneda2;
+    @FXML
+    private Pane Moneda3;
+    @FXML
+    private Pane Moneda4;
+    @FXML
+    private Pane Moneda5;
     //chica sprites
     Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
     Image DerPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
@@ -103,6 +109,9 @@ public class EntradaController implements Initializable {
         monedas.add(new Moneda(Moneda, personaje, personaje1, rootPane));
         monedas.add(new Moneda(Moneda1, personaje, personaje1, rootPane));
         monedas.add(new Moneda(Moneda2, personaje, personaje1, rootPane));
+        monedas.add(new Moneda(Moneda3, personaje, personaje1, rootPane));
+        monedas.add(new Moneda(Moneda4, personaje, personaje1, rootPane));
+        monedas.add(new Moneda(Moneda5, personaje, personaje1, rootPane));
     }
 
     private void configurarEventosTeclado() {

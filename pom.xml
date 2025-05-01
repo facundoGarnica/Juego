@@ -18,6 +18,12 @@
         </dependency>
         <dependency>
             <groupId>org.openjfx</groupId>
+             <artifactId>javafx-media</artifactId>
+            <version>23.0.2</version>  <!-- Usa la misma versión estable -->
+        </dependency>
+
+        <dependency>
+            <groupId>org.openjfx</groupId>
             <artifactId>javafx-graphics</artifactId>
             <version>23.0.2</version>
         </dependency>
@@ -30,6 +36,12 @@
             <groupId>org.openjfx</groupId>
             <artifactId>javafx-fxml</artifactId>
             <version>23.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openjfx</groupId>
+            <artifactId>javafx-media</artifactId>
+            <version>25-ea+14</version>
+            <type>jar</type>
         </dependency>
     </dependencies>
     <build>
