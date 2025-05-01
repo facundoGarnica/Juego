@@ -1,5 +1,7 @@
 package carne.Ventanas;
 
+import carne.Clases.Camara;
+import carne.Clases.Moneda;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.animation.AnimationTimer;
@@ -22,7 +24,11 @@ public class EntradaController implements Initializable {
     private List<Personaje> personajes;
     private Plataforma plataforma1;
     private Plataforma plataforma2;
+    private Moneda moneda;
     List<Plataforma> plataformas;
+    private List<Moneda> monedas = new ArrayList<>();
+
+    Camara camara;
     @FXML
     private AnchorPane rootPane;
     @FXML
@@ -39,9 +45,11 @@ public class EntradaController implements Initializable {
     @FXML
     private Pane Plataforma2;
     @FXML
-    private Pane CambiarIzquierda;
+    private Pane Moneda;
     @FXML
-    private Pane CambiarDerecha;
+    private Pane Moneda1;
+    @FXML
+    private Pane Moneda2;
     //chica sprites
     Image DerPaso1Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso1.png").toExternalForm());
     Image DerPaso2Chica = new Image(getClass().getResource("/Imagenes/Chica/der paso2.png").toExternalForm());
@@ -69,34 +77,32 @@ public class EntradaController implements Initializable {
         plataforma2 = new Plataforma(Plataforma2);
         plataformas.add(plataforma1);
         plataformas.add(plataforma2);
-        personaje = new Personaje(rootPane, PanePJ1, ImagenPJ, DerPaso1Chica, DerPaso2Chica,
+        personaje = new Personaje(PanePJ1, ImagenPJ, DerPaso1Chica, DerPaso2Chica,
                 IzqPaso1Chica, IzqPaso2Chica, DerIdleChica,
                 IzqIdleChica, TransicionIzqChica, TransicionDerChica);
+
         personaje.setPlataformas(plataformas);
-        personaje1 = new Personaje(rootPane, PanePJ2, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
+
+        personaje1 = new Personaje(PanePJ2, ImagenPJ1, DerPaso1Chico, DerPaso2Chico,
                 IzqPaso1Chico, IzqPaso2Chico, DerIdleChico,
                 IzqIdleChico, TransicionIzqChico, TransicionDerChico);
+
         personaje1.setPlataformas(plataformas);
+
         configurarEventosTeclado();
         iniciarBucleJuego();
         rootPane.requestFocus();  // Solicita el foco para que el rootPane reciba eventos de teclado
         rootPane.setFocusTraversable(true);  //  rootPane es traversable
 
-        //le paso el tamaño de la ventana al personaje
-        //  personaje.setAnchoVentanaVisible(rootPane.getWidth());
-        //dd personaje1.setAnchoVentanaVisible(rootPane.getWidth());
-        personaje.setPanes(CambiarIzquierda, CambiarDerecha);
-        personaje1.setPanes(CambiarIzquierda, CambiarDerecha);
-
         // Crear la lista de personajes
         personajes = new ArrayList<>();
         personajes.add(personaje);
         personajes.add(personaje1);
-        // Asignar la lista de otros personajes a cada uno
-        personaje.setOtroPersonaje(personaje1);
-        personaje1.setOtroPersonaje(personaje);
-       // personaje1.setOtrosPersonajes(personajes);
 
+        camara = new Camara(rootPane, personaje, personaje1);
+        monedas.add(new Moneda(Moneda, personaje, personaje1, rootPane));
+        monedas.add(new Moneda(Moneda1, personaje, personaje1, rootPane));
+        monedas.add(new Moneda(Moneda2, personaje, personaje1, rootPane));
     }
 
     private void configurarEventosTeclado() {
@@ -145,6 +151,11 @@ public class EntradaController implements Initializable {
             public void handle(long now) {
                 personaje.actualizar(now);
                 personaje1.actualizar(now);
+                camara.actualizar();
+                for (Moneda m : monedas) {
+                    m.actualizar();
+                }
+
             }
         }.start();
     }

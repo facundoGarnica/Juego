@@ -32,23 +32,34 @@
                   </ImageView>
                </children>
             </Pane>
-            <Pane fx:id="Plataforma2" layoutX="2383.0" layoutY="509.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
-            <Pane fx:id="CambiarIzquierda" layoutX="1.0" layoutY="2.0" prefHeight="1080.0" prefWidth="230.0">
+            <Pane fx:id="Plataforma2" layoutX="1859.0" layoutY="506.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />
+            <Pane fx:id="Moneda" layoutX="510.0" layoutY="407.0" prefHeight="39.0" prefWidth="44.0">
                <children>
-                  <ImageView fitHeight="975.0" fitWidth="199.0" layoutX="33.0" layoutY="85.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="45.0" fitWidth="44.0" layoutY="-5.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../Imagenes/Objetos/paneles%20de%20pared.png" />
+                        <Image url="@../Imagenes/Objetos/moneda.png" />
                      </image>
                   </ImageView>
-               </children></Pane>
-            <Pane fx:id="CambiarDerecha" layoutX="1690.0" layoutY="22.0" prefHeight="1080.0" prefWidth="230.0">
+               </children>
+            </Pane>
+            <Pane fx:id="Moneda1" layoutX="635.0" layoutY="407.0" prefHeight="39.0" prefWidth="44.0">
                <children>
-                  <ImageView fitHeight="975.0" fitWidth="199.0" pickOnBounds="true" preserveRatio="true">
+                  <ImageView fitHeight="45.0" fitWidth="44.0" layoutY="-5.0" pickOnBounds="true" preserveRatio="true">
                      <image>
-                        <Image url="@../Imagenes/Objetos/paneles%20de%20pared.png" />
+                        <Image url="@../Imagenes/Objetos/moneda.png" />
                      </image>
                   </ImageView>
-               </children></Pane>
+               </children>
+            </Pane>
+            <Pane fx:id="Moneda2" layoutX="732.0" layoutY="314.0" prefHeight="39.0" prefWidth="44.0">
+               <children>
+                  <ImageView fitHeight="45.0" fitWidth="44.0" layoutY="-5.0" pickOnBounds="true" preserveRatio="true">
+                     <image>
+                        <Image url="@../Imagenes/Objetos/moneda.png" />
+                     </image>
+                  </ImageView>
+               </children>
+            </Pane>
          </children>
       </AnchorPane>
    </children>

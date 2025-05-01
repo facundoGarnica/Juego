@@ -12,9 +12,8 @@ public class Personaje {
 
     private Pane contenedor;
     private ImageView sprite;
-    private AnchorPane root;
     private List<Plataforma> plataformas;
-
+    private int puntos = 0; //esto es para las monedas
     private boolean izquierdaPresionada = false;
     private boolean derechaPresionada = false;
     private boolean saltando = false;
@@ -30,28 +29,18 @@ public class Personaje {
     private Image imgCaminarIzquierda1, imgCaminarIzquierda2;
     private Image imgCaminarDerecha1, imgCaminarDerecha2;
     private Image imgIdleIzquierda, imgIdleDerecha;
-    private Image imgtransicionIzquierda, imgtransicionDerecha;
+    private Image imgTransicionIzquierda, imgTransicionDerecha;
 
     private long ultimoCambioFrame = 0;
     private int estadoAnimacion = 0;
     private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
 
-    private Pane CambiarIzquierda;
-    private Pane CambiarDerecha;
-
-    private boolean bordeIzquierdoPegado = false;
-    private boolean bordeDerechoPegado = false;
-    private double distanciaEntreBordes = -1;
-    private Personaje otroPersonaje;
-    private double velocidadCamara = 1.5;
-
-    public Personaje(AnchorPane root, Pane contenedor, ImageView sprite,
+    public Personaje(Pane contenedor, ImageView sprite,
             Image imgCaminarIzquierda1, Image imgCaminarIzquierda2,
             Image imgCaminarDerecha1, Image imgCaminarDerecha2,
             Image imgIdleIzquierda, Image imgIdleDerecha,
-            Image imgtransicionIzquierda, Image imgtransicionDerecha) {
+            Image imgTransicionIzquierda, Image imgTransicionDerecha) {
 
-        this.root = root;
         this.contenedor = contenedor;
         this.sprite = sprite;
 
@@ -61,29 +50,20 @@ public class Personaje {
         this.imgCaminarDerecha2 = imgCaminarDerecha2;
         this.imgIdleIzquierda = imgIdleIzquierda;
         this.imgIdleDerecha = imgIdleDerecha;
-        this.imgtransicionIzquierda = imgtransicionIzquierda;
-        this.imgtransicionDerecha = imgtransicionDerecha;
+        this.imgTransicionIzquierda = imgTransicionIzquierda;
+        this.imgTransicionDerecha = imgTransicionDerecha;
 
         this.plataformas = new ArrayList<>();
         configurarPersonaje();
     }
 
-    public void setPanes(Pane CambiarIzquierda, Pane CambiarDerecha) {
-        this.CambiarIzquierda = CambiarIzquierda;
-        this.CambiarDerecha = CambiarDerecha;
+    private void configurarPersonaje() {
+        contenedor.setLayoutY(Y_SUELO);
+        sprite.setImage(imgIdleDerecha);
     }
 
     public void setPlataformas(List<Plataforma> plataformas) {
         this.plataformas = plataformas;
-    }
-
-    public void setOtroPersonaje(Personaje otroPersonaje) {
-        this.otroPersonaje = otroPersonaje;
-    }
-
-    private void configurarPersonaje() {
-        contenedor.setLayoutY(Y_SUELO);
-        sprite.setImage(imgIdleDerecha);
     }
 
     public void presionarTecla(KeyCode code) {
@@ -120,107 +100,40 @@ public class Personaje {
         animar(now);
     }
 
-    public void moverHorizontal(long now) {
-    double nuevaX = contenedor.getLayoutX();
-    boolean colision = false;
+    private void moverHorizontal(long now) {
+        double nuevaX = contenedor.getLayoutX();
+        boolean colision = false;
 
-    boolean otroTocandoIzquierdo = otroPersonaje != null &&
-            otroPersonaje.getContenedor().getBoundsInParent().intersects(CambiarIzquierda.getBoundsInParent());
-    boolean otroTocandoDerecho = otroPersonaje != null &&
-            otroPersonaje.getContenedor().getBoundsInParent().intersects(CambiarDerecha.getBoundsInParent());
-
-    if (izquierdaPresionada) {
-        nuevaX -= velocidadX;
-
-        if (contenedor.getBoundsInParent().intersects(CambiarIzquierda.getBoundsInParent())) {
-            if (!bordeIzquierdoPegado) {
-                bordeIzquierdoPegado = true;
-                bordeDerechoPegado = false;
-                distanciaEntreBordes = CambiarDerecha.getLayoutX() - (contenedor.getLayoutX() + contenedor.getWidth());
-            }
-
-            if (!otroTocandoDerecho && (!otroTocandoIzquierdo || this == getPrioridadControlador())) {
-                double desplazamientoCamara = velocidadCamara;
-                root.setTranslateX(root.getTranslateX() + desplazamientoCamara);
-                contenedor.setLayoutX(nuevaX + desplazamientoCamara);
-
-                // Solo mover los Pane si ambos no están tocando sus bordes
-                if (!(otroTocandoIzquierdo && otroTocandoDerecho)) {
-                    CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - CambiarIzquierda.getWidth());
-                    CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth() + distanciaEntreBordes);
-                }
-
-                CambiarIzquierda.toFront();
-                CambiarDerecha.toFront();
-            }
-
-        } else {
-            bordeIzquierdoPegado = false;
-            distanciaEntreBordes = -1;
-
+        if (izquierdaPresionada) {
+            nuevaX -= velocidadX;
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
                     colision = true;
                     break;
                 }
             }
-
-            if (!colision && nuevaX >= 0) {
+            if (!colision) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
             }
-        }
-
-    } else if (derechaPresionada) {
-        nuevaX += velocidadX;
-
-        if (contenedor.getBoundsInParent().intersects(CambiarDerecha.getBoundsInParent())) {
-            if (!bordeDerechoPegado) {
-                bordeDerechoPegado = true;
-                bordeIzquierdoPegado = false;
-                distanciaEntreBordes = (contenedor.getLayoutX()) - CambiarIzquierda.getLayoutX();
-            }
-
-            if (!otroTocandoIzquierdo && (!otroTocandoDerecho || this == getPrioridadControlador())) {
-                double desplazamientoCamara = velocidadCamara;
-                root.setTranslateX(root.getTranslateX() - desplazamientoCamara);
-                contenedor.setLayoutX(nuevaX - desplazamientoCamara);
-
-                // Solo mover los Pane si ambos no están tocando sus bordes
-                if (!(otroTocandoIzquierdo && otroTocandoDerecho)) {
-                    CambiarDerecha.setLayoutX(contenedor.getLayoutX() + contenedor.getWidth());
-                    CambiarIzquierda.setLayoutX(contenedor.getLayoutX() - distanciaEntreBordes);
-                }
-
-                CambiarIzquierda.toFront();
-                CambiarDerecha.toFront();
-            }
-
-        } else {
-            bordeDerechoPegado = false;
-            distanciaEntreBordes = -1;
-
+        } else if (derechaPresionada) {
+            nuevaX += velocidadX;
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
                     colision = true;
                     break;
                 }
             }
-
-            if (!colision && nuevaX + contenedor.getWidth() <= root.getWidth()) {
+            if (!colision) {
                 contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
             }
+        } else if (!saltando) {
+            sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
         }
-
-    } else if (!saltando) {
-        sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
     }
-}
 
-
-
-    public void aplicarGravedad(long now) {
+    private void aplicarGravedad(long now) {
         velocidadY += GRAVEDAD;
         contenedor.setLayoutY(contenedor.getLayoutY() + velocidadY);
 
@@ -234,7 +147,6 @@ public class Personaje {
                 contenedor.setLayoutY(p.getBounds().getMinY() - contenedor.getHeight());
                 break;
             }
-
             if (p.detectarColisionDesdeAbajo(contenedor, velocidadY)) {
                 velocidadY = 0;
                 break;
@@ -268,11 +180,11 @@ public class Personaje {
                 case 0 ->
                     sprite.setImage(imgCaminarIzquierda1);
                 case 1 ->
-                    sprite.setImage(imgtransicionIzquierda);
+                    sprite.setImage(imgTransicionIzquierda);
                 case 2 ->
                     sprite.setImage(imgCaminarIzquierda2);
                 case 3 ->
-                    sprite.setImage(imgtransicionIzquierda);
+                    sprite.setImage(imgTransicionIzquierda);
             }
             estadoAnimacion = (estadoAnimacion + 1) % 4;
             ultimoCambioFrame = now;
@@ -285,11 +197,11 @@ public class Personaje {
                 case 0 ->
                     sprite.setImage(imgCaminarDerecha1);
                 case 1 ->
-                    sprite.setImage(imgtransicionDerecha);
+                    sprite.setImage(imgTransicionDerecha);
                 case 2 ->
                     sprite.setImage(imgCaminarDerecha2);
                 case 3 ->
-                    sprite.setImage(imgtransicionDerecha);
+                    sprite.setImage(imgTransicionDerecha);
             }
             estadoAnimacion = (estadoAnimacion + 1) % 4;
             ultimoCambioFrame = now;
@@ -300,19 +212,12 @@ public class Personaje {
         return contenedor;
     }
 
-    public ImageView getSprite() {
-        return sprite;
+    public void agregarPuntos(int cantidad) {
+        puntos += cantidad;
+        System.out.println("Puntos: " + puntos); //  debug
     }
 
-    public boolean estaTocandoPaneIzquierdo() {
-        return contenedor.getBoundsInParent().intersects(CambiarIzquierda.getBoundsInParent());
-    }
-
-    public boolean estaTocandoPaneDerecho() {
-        return contenedor.getBoundsInParent().intersects(CambiarDerecha.getBoundsInParent());
-    }
-
-    private Personaje getPrioridadControlador() {
-        return this.hashCode() < otroPersonaje.hashCode() ? this : otroPersonaje;
+    public int getPuntos() {
+        return puntos;
     }
 }

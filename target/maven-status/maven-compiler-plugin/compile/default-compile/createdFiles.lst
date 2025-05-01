@@ -2,7 +2,9 @@ carne\Clases\Personaje.class
 carne\Ventanas\EntradaController$1.class
 carne\juego\SystemInfo.class
 module-info.class
+carne\Clases\Moneda.class
 carne\Clases\Plataforma.class
 carne\juego\App.class
+carne\Clases\Camara.class
 carne\Ventanas\EntradaController.class
 carne\Clases\Personaje$1.class
