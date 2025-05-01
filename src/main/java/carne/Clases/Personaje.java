@@ -10,6 +10,9 @@ import javafx.scene.layout.Pane;
 
 public class Personaje {
 
+    private int vida = 500;
+    private final int VIDA_MAXIMA = 500;
+    private int monedas = 0;
     private Pane contenedor;
     private ImageView sprite;
     private List<Plataforma> plataformas;
@@ -57,6 +60,11 @@ public class Personaje {
         configurarPersonaje();
     }
 
+    public void detenerMovimiento() {
+        izquierdaPresionada = false; // Detenemos la marcha hacia la izquierda
+        derechaPresionada = false;  // Detenemos la marcha hacia la derecha
+    }
+
     private void configurarPersonaje() {
         contenedor.setLayoutY(Y_SUELO);
         sprite.setImage(imgIdleDerecha);
@@ -101,37 +109,63 @@ public class Personaje {
     }
 
     private void moverHorizontal(long now) {
-        double nuevaX = contenedor.getLayoutX();
-        boolean colision = false;
+    double nuevaX = contenedor.getLayoutX();
+    boolean colision = false;
 
-        if (izquierdaPresionada) {
-            nuevaX -= velocidadX;
-            for (Plataforma p : plataformas) {
-                if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
-                    colision = true;
-                    break;
-                }
+    // Verificar si está presionando la tecla de izquierda
+    if (izquierdaPresionada) {
+        nuevaX -= velocidadX;
+
+        // Verificar colisión con las plataformas o paredes
+        for (Plataforma p : plataformas) {
+            if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
+                colision = true;
+                break;
             }
-            if (!colision) {
-                contenedor.setLayoutX(nuevaX);
-                cambiarImagenCaminarIzquierda(now);
-            }
-        } else if (derechaPresionada) {
-            nuevaX += velocidadX;
-            for (Plataforma p : plataformas) {
-                if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
-                    colision = true;
-                    break;
-                }
-            }
-            if (!colision) {
-                contenedor.setLayoutX(nuevaX);
-                cambiarImagenCaminarDerecha(now);
-            }
-        } else if (!saltando) {
-            sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
         }
+
+        // Verificar si se está moviendo fuera del borde izquierdo del Pane
+        if (nuevaX < 0) {
+            nuevaX = 0; // Impide que el personaje salga del borde izquierdo
+            colision = true; // Se marca que hubo colisión para detener el movimiento
+        }
+
+        // Si no hay colisión, actualizar la posición
+        if (!colision) {
+            contenedor.setLayoutX(nuevaX);
+            cambiarImagenCaminarIzquierda(now);
+        }
+    } 
+    // Verificar si está presionando la tecla de derecha
+    else if (derechaPresionada) {
+        nuevaX += velocidadX;
+
+        // Verificar colisión con las plataformas o paredes
+        for (Plataforma p : plataformas) {
+            if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
+                colision = true;
+                break;
+            }
+        }
+
+        // Verificar si se está moviendo fuera del borde derecho del Pane
+        if (nuevaX + contenedor.getWidth() > contenedor.getParent().getLayoutBounds().getMaxX()) {
+            nuevaX = contenedor.getParent().getLayoutBounds().getMaxX() - contenedor.getWidth(); // Impide que el personaje salga del borde derecho
+            colision = true; // Se marca que hubo colisión para detener el movimiento
+        }
+
+        // Si no hay colisión, actualizar la posición
+        if (!colision) {
+            contenedor.setLayoutX(nuevaX);
+            cambiarImagenCaminarDerecha(now);
+        }
+    } 
+    // Si no se está moviendo, mostrar la imagen de inactividad
+    else if (!saltando) {
+        sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
     }
+}
+
 
     private void aplicarGravedad(long now) {
         velocidadY += GRAVEDAD;
@@ -219,5 +253,28 @@ public class Personaje {
 
     public int getPuntos() {
         return puntos;
+    }
+
+    public void agregarMoneda() {
+        monedas++;
+    }
+
+    public int getMonedas() {
+        return monedas;
+    }
+
+    public void QuitarVida(int danio) {
+        vida = vida - danio;
+    }
+
+    public int getVida() {
+        return vida;
+    }
+
+    public void curarVida(int cantidad) {
+        vida += cantidad;
+        if (vida > VIDA_MAXIMA) {
+            vida = VIDA_MAXIMA;
+        }
     }
 }

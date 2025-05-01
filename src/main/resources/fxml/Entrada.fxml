@@ -11,6 +11,24 @@
         <URL value="@../styles/entrada.css" />
     </stylesheets>
    <children>
+      <Pane fx:id="Pared1" layoutX="0.0" layoutY="200.0" prefHeight="532.0" prefWidth="44.0">
+         <children>
+            <ImageView fitHeight="101.0" fitWidth="23.0" layoutX="11.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Imagenes/Objetos/paneles%20de%20pared.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
+      <Pane fx:id="Pared2" layoutX="1900.0" layoutY="142.0" prefHeight="532.0" prefWidth="44.0">
+         <children>
+            <ImageView fitHeight="208.0" fitWidth="23.0" layoutX="11.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
+               <image>
+                  <Image url="@../Imagenes/Objetos/paneles%20de%20pared.png" />
+               </image>
+            </ImageView>
+         </children>
+      </Pane>
       <AnchorPane fx:id="rootPane" prefHeight="1102.0" prefWidth="4712.0">
          <children>
             <Pane fx:id="Plataforma" layoutX="444.0" layoutY="482.0" prefHeight="30.0" prefWidth="219.0" styleClass="Plataforma" />

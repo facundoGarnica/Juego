@@ -1,58 +1,73 @@
 package carne.Clases;
 
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.Pane;
 
 public class Camara {
 
     private Personaje personaje1;
     private Personaje personaje2;
     private AnchorPane root;
+    private Pane pared1;
+    private Pane pared2;
 
     private double desplazamientoActual = 0;
-    private final double suavizadoBase = 0.1; // Valor base de suavizado
-    private final long INTERVALO_CAMBIO_FRAME = 100_000_000; // en nanosegundos
+    private final double suavizadoBase = 0.1;
+    private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
 
-    private final double UMEBRAL_BORDE = 100; // Umbral de distancia desde el borde para mover la cámara
-    private final double ANCHO_PANTALLA = 800; // Ancho de la pantalla (puedes ajustarlo)
+    private final double ANCHO_PANTALLA = 800;
 
-    public Camara(AnchorPane root, Personaje p1, Personaje p2) {
+    private boolean movimientoActivo = true;
+
+    public Camara(AnchorPane root, Personaje p1, Personaje p2, Pane pared1, Pane pared2) {
         this.root = root;
         this.personaje1 = p1;
         this.personaje2 = p2;
+        this.pared1 = pared1;
+        this.pared2 = pared2;
     }
 
     public void actualizar() {
-        double centro1 = personaje1.getContenedor().getLayoutX() + personaje1.getContenedor().getWidth() / 2;
-        double centro2 = personaje2.getContenedor().getLayoutX() + personaje2.getContenedor().getWidth() / 2;
+        // Verificamos si alguno de los personajes está tocando una pared
+        boolean personaje1TocaPared = estaTocandoPared(personaje1);
+        boolean personaje2TocaPared = estaTocandoPared(personaje2);
 
-        double centroPromedio = (centro1 + centro2) / 2;
-
-        // Queremos que el centro de la pantalla siga a los personajes
-        double objetivo = -(centroPromedio - ANCHO_PANTALLA / 2);
-
-        // Convertir el intervalo de tiempo a segundos
-        double tiempoEnSegundos = INTERVALO_CAMBIO_FRAME / 1_000_000_000.0;
-
-        // Ajustar suavizado según el intervalo de fotogramas
-        double suavizado = suavizadoBase * tiempoEnSegundos;
-
-        // Obtener las posiciones de los personajes respecto a los bordes de la pantalla
-        double bordeIzq1 = personaje1.getContenedor().getLayoutX();
-        double bordeDer1 = bordeIzq1 + personaje1.getContenedor().getWidth();
-        double bordeIzq2 = personaje2.getContenedor().getLayoutX();
-        double bordeDer2 = bordeIzq2 + personaje2.getContenedor().getWidth();
-
-        // Verificar si ambos personajes están cerca del borde izquierdo o derecho
-        boolean ambosCercaIzq = bordeIzq1 <= UMEBRAL_BORDE && bordeIzq2 <= UMEBRAL_BORDE;
-        boolean ambosCercaDer = bordeDer1 >= ANCHO_PANTALLA - UMEBRAL_BORDE && bordeDer2 >= ANCHO_PANTALLA - UMEBRAL_BORDE;
-
-        // La cámara solo se mueve si ambos personajes están cerca de los bordes
-        if (ambosCercaIzq || ambosCercaDer) {
-            // Interpolación suave
-            desplazamientoActual += (objetivo - desplazamientoActual) * suavizado;
+        // Si ambos personajes están tocando alguna pared, se detienen
+        if (personaje1TocaPared) {
+            personaje1.detenerMovimiento(); // Detenemos el movimiento de personaje1
+        }
+        if (personaje2TocaPared) {
+            personaje2.detenerMovimiento(); // Detenemos el movimiento de personaje2
         }
 
-        // Establecer la nueva posición de la cámara
-        root.setTranslateX(desplazamientoActual);
+        // Ahora, se actualiza la cámara solo si los personajes no tocan las paredes
+        if (!personaje1TocaPared && !personaje2TocaPared) {
+            double centro1 = personaje1.getContenedor().getLayoutX() + personaje1.getContenedor().getWidth() / 2;
+            double centro2 = personaje2.getContenedor().getLayoutX() + personaje2.getContenedor().getWidth() / 2;
+
+            double centroPromedio = (centro1 + centro2) / 2;
+            double objetivo = -(centroPromedio - ANCHO_PANTALLA / 2);
+
+            double tiempoEnSegundos = INTERVALO_CAMBIO_FRAME / 1_000_000_000.0;
+            double suavizado = suavizadoBase * tiempoEnSegundos;
+
+            desplazamientoActual += (objetivo - desplazamientoActual) * suavizado;
+            root.setTranslateX(desplazamientoActual);
+        }
+    }
+
+    private boolean estaTocandoPared(Personaje personaje) {
+        double personajeX = personaje.getContenedor().getLayoutX();
+        double personajeAncho = personaje.getContenedor().getWidth();
+        double personajeDerecha = personajeX + personajeAncho;
+
+        double pared1X = pared1.getLayoutX() - root.getTranslateX();
+        double pared2X = pared2.getLayoutX() - root.getTranslateX();
+
+        // Verificamos si el personaje toca alguna de las paredes
+        boolean tocaPared1 = personajeDerecha >= pared1X && personajeX <= pared1X + pared1.getWidth();
+        boolean tocaPared2 = personajeX <= pared2X + pared2.getWidth() && personajeDerecha >= pared2X;
+
+        return tocaPared1 || tocaPared2;
     }
 }

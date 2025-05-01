@@ -1,7 +1,6 @@
 package carne.Clases;
 
 import javafx.animation.TranslateTransition;
-import javafx.geometry.Bounds;
 import javafx.scene.layout.Pane;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
@@ -14,10 +13,8 @@ public class Moneda {
     private Personaje personaje1;
     private Personaje personaje2;
     private Pane root;
-    private double distancia = 15.0;  // Distancia de movimiento arriba y abajo
+    private double distancia = 15.0;
     private TranslateTransition transition;
-
-    // MediaPlayer para el sonido
     private MediaPlayer mediaPlayer;
 
     public Moneda(Pane monedaPane, Personaje personaje1, Personaje personaje2, Pane root) {
@@ -26,21 +23,21 @@ public class Moneda {
         this.personaje2 = personaje2;
         this.root = root;
 
-        // Ruta del archivo de sonido (asegúrate de que la ruta sea correcta)
-        String path = "sound/Monedas/recolectar.mp3";  // Ruta relativa desde resources
-        // Cargar el recurso desde el classloader
+        // Cargar sonido
+        String path = "sound/Monedas/recolectar.mp3";
         Media media = new Media(getClass().getClassLoader().getResource(path).toString());
         mediaPlayer = new MediaPlayer(media);
 
+        // Animación de flotación
         Random random = new Random();
-        double duracion = 1000 + random.nextInt(1000); // Duración entre 1 y 2 segundos
+        double duracion = 1000 + random.nextInt(1000);
 
         transition = new TranslateTransition(Duration.millis(duracion), monedaPane);
-        transition.setByY(-distancia);  // Mover hacia arriba
-        transition.setAutoReverse(true);  // Volver al punto original
-        transition.setCycleCount(TranslateTransition.INDEFINITE);  // Ciclo infinito
-        transition.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);  // Movimiento suave
-        transition.play();  // Iniciar animación
+        transition.setByY(-distancia);
+        transition.setAutoReverse(true);
+        transition.setCycleCount(TranslateTransition.INDEFINITE);
+        transition.setInterpolator(javafx.animation.Interpolator.EASE_BOTH);
+        transition.play();
     }
 
     public void actualizar() {
@@ -48,16 +45,18 @@ public class Moneda {
 
         if (esColision(personaje1)) {
             personaje1.agregarPuntos(20);
+            personaje1.agregarMoneda();  // ← Aumentar contador de monedas
             root.getChildren().remove(monedaPane);
-            System.out.println("Moneda agarrada por jugador 1");
-            playSound();  // Reproducir el sonido
-            transition.stop();  // Detener animación
+            System.out.println("Moneda agarrada por jugador 1 - Total monedas: " + personaje1.getMonedas());
+            playSound();
+            transition.stop();
         } else if (esColision(personaje2)) {
             personaje2.agregarPuntos(20);
+            personaje2.agregarMoneda();  // ← Aumentar contador de monedas
             root.getChildren().remove(monedaPane);
-            System.out.println("Moneda agarrada por jugador 2");
-            playSound();  // Reproducir el sonido
-            transition.stop();  // Detener animación
+            System.out.println("Moneda agarrada por jugador 2 - Total monedas: " + personaje2.getMonedas());
+            playSound();
+            transition.stop();
         }
     }
 
@@ -65,9 +64,8 @@ public class Moneda {
         return monedaPane.getBoundsInParent().intersects(p.getContenedor().getBoundsInParent());
     }
 
-    // Método para reproducir el sonido
     private void playSound() {
-        mediaPlayer.stop();  // Detener cualquier reproducción anterior
-        mediaPlayer.play();  // Reproducir el sonido
+        mediaPlayer.stop();
+        mediaPlayer.play();
     }
 }

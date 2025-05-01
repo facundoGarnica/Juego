@@ -37,6 +37,10 @@ public class EntradaController implements Initializable {
     private ImageView ImagenPJ1;
 
     @FXML
+    private Pane Pared1;
+    @FXML
+    private Pane Pared2;
+    @FXML
     private Pane PanePJ1;
     @FXML
     private Pane PanePJ2;
@@ -105,7 +109,7 @@ public class EntradaController implements Initializable {
         personajes.add(personaje);
         personajes.add(personaje1);
 
-        camara = new Camara(rootPane, personaje, personaje1);
+        camara = new Camara(rootPane, personaje, personaje1,Pared1,Pared2);
         monedas.add(new Moneda(Moneda, personaje, personaje1, rootPane));
         monedas.add(new Moneda(Moneda1, personaje, personaje1, rootPane));
         monedas.add(new Moneda(Moneda2, personaje, personaje1, rootPane));
@@ -164,6 +168,7 @@ public class EntradaController implements Initializable {
                 for (Moneda m : monedas) {
                     m.actualizar();
                 }
+                
 
             }
         }.start();
