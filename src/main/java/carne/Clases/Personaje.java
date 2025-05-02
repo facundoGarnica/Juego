@@ -9,8 +9,6 @@ import javafx.scene.layout.Pane;
 
 public class Personaje {
 
-    private boolean DerechaDetenida = false;
-    private boolean IzquierdaDetenida = false;
     private int vida = 500;
     private final int VIDA_MAXIMA = 500;
     private int monedas = 0;
@@ -63,8 +61,8 @@ public class Personaje {
     }
 
     public void detenerMovimiento() {
-        izquierdaPresionada = false;
-        derechaPresionada = false;
+        izquierdaPresionada = false; // Detenemos la marcha hacia la izquierda
+        derechaPresionada = false;  // Detenemos la marcha hacia la derecha
     }
 
     private void configurarPersonaje() {
@@ -114,9 +112,10 @@ public class Personaje {
         double nuevaX = contenedor.getLayoutX();
         boolean colision = false;
 
-        if (izquierdaPresionada && !IzquierdaDetenida) {
-            double posibleX = nuevaX - velocidadX;
+        if (izquierdaPresionada) {
+            nuevaX -= velocidadX;
 
+            // Comprobamos la colisión con las plataformas
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralDerecha(contenedor, -velocidadX)) {
                     colision = true;
@@ -124,21 +123,21 @@ public class Personaje {
                 }
             }
 
-            if (posibleX < 0) {
-                posibleX = 0;
-                colision = true;
+            // Comprobamos colisión con la pared izquierda
+            if (nuevaX < 0) {
+                nuevaX = 0; // Impide que el personaje salga del borde izquierdo
+                colision = true; // Se marca que hubo colisión para detener el movimiento
             }
 
+            // Si no hay colisión, actualizamos la posición
             if (!colision) {
-                contenedor.setLayoutX(posibleX);
+                contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarIzquierda(now);
-            } else {
-                sprite.setImage(imgIdleIzquierda);
             }
+        } else if (derechaPresionada) {
+            nuevaX += velocidadX;
 
-        } else if (derechaPresionada && !DerechaDetenida) {
-            double posibleX = nuevaX + velocidadX;
-
+            // Comprobamos la colisión con las plataformas
             for (Plataforma p : plataformas) {
                 if (p.detectarColisionLateralIzquierda(contenedor, velocidadX)) {
                     colision = true;
@@ -146,19 +145,18 @@ public class Personaje {
                 }
             }
 
+            // Comprobamos colisión con la pared derecha
             double maxX = contenedor.getParent().getLayoutBounds().getMaxX() - contenedor.getWidth();
-            if (posibleX > maxX) {
-                posibleX = maxX;
-                colision = true;
+            if (nuevaX > maxX) {
+                nuevaX = maxX; // Impide que el personaje salga del borde derecho
+                colision = true; // Se marca que hubo colisión para detener el movimiento
             }
 
+            // Si no hay colisión, actualizamos la posición
             if (!colision) {
-                contenedor.setLayoutX(posibleX);
+                contenedor.setLayoutX(nuevaX);
                 cambiarImagenCaminarDerecha(now);
-            } else {
-                sprite.setImage(imgIdleDerecha);
             }
-
         } else if (!saltando) {
             sprite.setImage(mirandoADerecha ? imgIdleDerecha : imgIdleIzquierda);
         }
@@ -198,9 +196,9 @@ public class Personaje {
     private void animar(long now) {
         if (saltando) {
             sprite.setImage(mirandoADerecha ? imgCaminarDerecha1 : imgCaminarIzquierda1);
-        } else if (izquierdaPresionada && !IzquierdaDetenida) {
+        } else if (izquierdaPresionada) {
             cambiarImagenCaminarIzquierda(now);
-        } else if (derechaPresionada && !DerechaDetenida) {
+        } else if (derechaPresionada) {
             cambiarImagenCaminarDerecha(now);
         }
     }
@@ -265,21 +263,5 @@ public class Personaje {
         if (vida > VIDA_MAXIMA) {
             vida = VIDA_MAXIMA;
         }
-    }
-
-    public void setTrueIzquierdaDetenida() {
-        IzquierdaDetenida = true;
-    }
-
-    public void setFalseIzquierdaDetenida() {
-        IzquierdaDetenida = false;
-    }
-
-    public void setTrueDerechaDetenida() {
-        DerechaDetenida = true;
-    }
-
-    public void setFalseDerechaDetenida() {
-        DerechaDetenida = false;
     }
 }
