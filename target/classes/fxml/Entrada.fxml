@@ -11,7 +11,7 @@
         <URL value="@../styles/entrada.css" />
     </stylesheets>
    <children>
-      <Pane fx:id="Pared1" layoutX="0.0" layoutY="200.0" prefHeight="532.0" prefWidth="44.0">
+      <Pane fx:id="Pared1" layoutX="150.0" layoutY="200.0" prefHeight="532.0" prefWidth="44.0">
          <children>
             <ImageView fitHeight="101.0" fitWidth="23.0" layoutX="11.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
                <image>
@@ -20,7 +20,7 @@
             </ImageView>
          </children>
       </Pane>
-      <Pane fx:id="Pared2" layoutX="1900.0" layoutY="142.0" prefHeight="532.0" prefWidth="44.0">
+      <Pane fx:id="Pared2" layoutX="1000.0" layoutY="142.0" prefHeight="532.0" prefWidth="44.0">
          <children>
             <ImageView fitHeight="208.0" fitWidth="23.0" layoutX="11.0" layoutY="234.0" pickOnBounds="true" preserveRatio="true">
                <image>

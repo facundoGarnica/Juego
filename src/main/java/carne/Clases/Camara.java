@@ -11,13 +11,7 @@ public class Camara {
     private Pane pared1;
     private Pane pared2;
 
-    private double desplazamientoActual = 0;
-    private final double suavizadoBase = 0.1;
-    private final long INTERVALO_CAMBIO_FRAME = 100_000_000;
-
-    private final double ANCHO_PANTALLA = 800;
-
-    private boolean movimientoActivo = true;
+    private final double VELOCIDAD_CAMARA = 3.0;
 
     public Camara(AnchorPane root, Personaje p1, Personaje p2, Pane pared1, Pane pared2) {
         this.root = root;
@@ -28,46 +22,70 @@ public class Camara {
     }
 
     public void actualizar() {
-        // Verificamos si alguno de los personajes está tocando una pared
-        boolean personaje1TocaPared = estaTocandoPared(personaje1);
-        boolean personaje2TocaPared = estaTocandoPared(personaje2);
+        // Verificamos si los personajes están tocando las paredes
+        boolean personaje1TocaPared1 = estaTocandoPared(personaje1, pared1);
+        boolean personaje1TocaPared2 = estaTocandoPared(personaje1, pared2);
+        boolean personaje2TocaPared1 = estaTocandoPared(personaje2, pared1);
+        boolean personaje2TocaPared2 = estaTocandoPared(personaje2, pared2);
 
-        // Si ambos personajes están tocando alguna pared, se detienen
-        if (personaje1TocaPared) {
-            personaje1.detenerMovimiento(); // Detenemos el movimiento de personaje1
+        // Si ambos personajes están tocando paredes opuestas, detenemos la cámara y a los personajes
+        if ((personaje1TocaPared1 && personaje2TocaPared2) || (personaje1TocaPared2 && personaje2TocaPared1)) {
+            detenerMovimiento();
+            return;
         }
-        if (personaje2TocaPared) {
-            personaje2.detenerMovimiento(); // Detenemos el movimiento de personaje2
+
+        // Control de detención para personaje1
+        if (personaje1TocaPared1) {
+            personaje1.setTrueIzquierdaDetenida();
+        } else {
+            personaje1.setFalseIzquierdaDetenida();
         }
 
-        // Ahora, se actualiza la cámara solo si los personajes no tocan las paredes
-        if (!personaje1TocaPared && !personaje2TocaPared) {
-            double centro1 = personaje1.getContenedor().getLayoutX() + personaje1.getContenedor().getWidth() / 2;
-            double centro2 = personaje2.getContenedor().getLayoutX() + personaje2.getContenedor().getWidth() / 2;
+        if (personaje1TocaPared2) {
+            personaje1.setTrueDerechaDetenida();
+        } else {
+            personaje1.setFalseDerechaDetenida();
+        }
 
-            double centroPromedio = (centro1 + centro2) / 2;
-            double objetivo = -(centroPromedio - ANCHO_PANTALLA / 2);
+        // Control de detención para personaje2
+        if (personaje2TocaPared1) {
+            personaje2.setTrueIzquierdaDetenida();
+        } else {
+            personaje2.setFalseIzquierdaDetenida();
+        }
 
-            double tiempoEnSegundos = INTERVALO_CAMBIO_FRAME / 1_000_000_000.0;
-            double suavizado = suavizadoBase * tiempoEnSegundos;
+        if (personaje2TocaPared2) {
+            personaje2.setTrueDerechaDetenida();
+        } else {
+            personaje2.setFalseDerechaDetenida();
+        }
 
-            desplazamientoActual += (objetivo - desplazamientoActual) * suavizado;
-            root.setTranslateX(desplazamientoActual);
+        // Si alguno toca solo pared1, movemos la cámara a la derecha
+        if ((personaje1TocaPared1 || personaje2TocaPared1) && !personaje1TocaPared2 && !personaje2TocaPared2) {
+            root.setTranslateX(root.getTranslateX() + VELOCIDAD_CAMARA);
+        }
+
+        // Si alguno toca solo pared2, movemos la cámara a la izquierda
+        if ((personaje1TocaPared2 || personaje2TocaPared2) && !personaje1TocaPared1 && !personaje2TocaPared1) {
+            root.setTranslateX(root.getTranslateX() - VELOCIDAD_CAMARA);
         }
     }
 
-    private boolean estaTocandoPared(Personaje personaje) {
+    // Detener movimiento de los personajes y cámara
+    private void detenerMovimiento() {
+        personaje1.detenerMovimiento();
+        personaje2.detenerMovimiento();
+    }
+
+    private boolean estaTocandoPared(Personaje personaje, Pane pared) {
         double personajeX = personaje.getContenedor().getLayoutX();
         double personajeAncho = personaje.getContenedor().getWidth();
         double personajeDerecha = personajeX + personajeAncho;
 
-        double pared1X = pared1.getLayoutX() - root.getTranslateX();
-        double pared2X = pared2.getLayoutX() - root.getTranslateX();
+        double paredX = pared.getLayoutX() - root.getTranslateX();
+        double paredAncho = pared.getWidth();
 
-        // Verificamos si el personaje toca alguna de las paredes
-        boolean tocaPared1 = personajeDerecha >= pared1X && personajeX <= pared1X + pared1.getWidth();
-        boolean tocaPared2 = personajeX <= pared2X + pared2.getWidth() && personajeDerecha >= pared2X;
-
-        return tocaPared1 || tocaPared2;
+        // Verifica si el personaje toca la pared
+        return personajeDerecha >= paredX && personajeX <= paredX + paredAncho;
     }
 }
